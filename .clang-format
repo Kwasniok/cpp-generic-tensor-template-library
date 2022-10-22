@@ -2,8 +2,15 @@
 Language: Cpp
 Standard: c++20
 
+AlignAfterOpenBracket: BlockIndent
 AllowShortFunctionsOnASingleLine: Inline
+AlwaysBreakAfterReturnType: All
 AlwaysBreakTemplateDeclarations: Yes
+BinPackArguments: false
+BinPackParameters: false
+BreakBeforeBraces: Linux
+BreakConstructorInitializers: BeforeColon
+BreakInheritanceList: BeforeColon
 ColumnLimit: 80
 CompactNamespaces: true
 ConstructorInitializerAllOnOneLineOrOnePerLine: true
@@ -12,9 +19,19 @@ FixNamespaceComments: true
 IncludeBlocks: Preserve
 IndentWidth: 4
 PointerAlignment: Left
+SeparateDefinitionBlocks: Always
 ShortNamespaceLines: 0
 SortIncludes: true
 SortUsingDeclarations: false
+SpaceBeforeCpp11BracedList: false
+SpaceBeforeSquareBrackets: false
+SpaceInEmptyBlock: true
 SpaceInEmptyParentheses: false
+SpacesInCStyleCastParentheses: false
+SpacesInConditionalStatement: false
+SpacesInContainerLiterals: false
+SpacesInParentheses: false
+SpacesInSquareBrackets: false
 TabWidth: 4
 UseTab: Never
+#QualifierOrder: ['inline', 'constexpr', 'static', 'const', 'volatile', 'type']
