@@ -8,4 +8,16 @@
  */
 namespace gttl
 {
+/**
+ * @brief namespace for constexpr utility functions
+ */
+namespace cexpr
+{
+/**
+ * @brief namespace for constexpr utility functions for std::array
+ */
+namespace array
+{
+}
+} // namespace cexpr
 } // namespace gttl
