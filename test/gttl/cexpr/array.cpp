@@ -5,9 +5,7 @@
 #include <boost/test/included/unit_test.hpp>
 #include <gttl/cexpr/array.hpp>
 
-namespace but = boost::unit_test;
 namespace bdata = boost::unit_test::data;
-namespace btt = boost::test_tools;
 namespace gca = gttl::cexpr::array;
 
 template <std::size_t N>

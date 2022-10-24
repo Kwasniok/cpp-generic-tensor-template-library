@@ -20,4 +20,11 @@ namespace array
 {
 }
 } // namespace cexpr
+
+/**
+ * @brief namespace for custome literals
+ */
+namespace literals
+{
+}
 } // namespace gttl
