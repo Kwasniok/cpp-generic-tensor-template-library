@@ -15,7 +15,6 @@
 namespace gttl
 {
 
-// TODO: rename to generic type name and use as alias
 /**
  * @brief Multi dimensional extension of gttl::Index.
  */
