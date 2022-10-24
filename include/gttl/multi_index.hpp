@@ -1,6 +1,6 @@
 /**
  * @file
- * @brief
+ * @brief multi-dimensional index
  */
 
 #ifndef GTTL_MULTI_INDEX_HPP
@@ -16,6 +16,9 @@ namespace gttl
 {
 
 // TODO: rename to generic type name and use as alias
+/**
+ * @brief Multi dimensional extension of gttl::Index.
+ */
 template <std::size_t RANK, Dimensions<RANK> DIMENSIONS>
 
 requires(cexpr::array::all_strictly_positive(DIMENSIONS)) struct MultiIndex {
@@ -193,6 +196,10 @@ requires(cexpr::array::all_strictly_positive(DIMENSIONS)) struct MultiIndex {
         return {*this, underflow};
     }
 
+    /**
+     * @brief concatenate with another index
+     * @note Left hand will become prefix.
+     */
     template <std::size_t RANK_RHS, Dimensions<RANK_RHS> DIMENSIONS_RHS>
     constexpr MultiIndex<
         RANK + RANK_RHS,
@@ -213,6 +220,11 @@ requires(cexpr::array::all_strictly_positive(DIMENSIONS)) struct MultiIndex {
         );
     }
 
+    /**
+     * @brief split another index and insert each index at various positions
+     * @note Positions are relative to original left hand index.
+     * @note Relative positions of inserted elements are preserved.
+     */
     template <
         std::size_t N,
         std::array<std::size_t, N> POSITIONS,
@@ -248,6 +260,9 @@ requires(cexpr::array::all_strictly_positive(DIMENSIONS)) struct MultiIndex {
         );
     }
 
+    /**
+     * @brief erase various dimensions
+     */
     template <std::size_t N, std::array<std::size_t, N> POSITIONS>
     constexpr MultiIndex<
         RANK - N,
@@ -268,6 +283,9 @@ requires(cexpr::array::all_strictly_positive(DIMENSIONS)) struct MultiIndex {
     }
 };
 
+/**
+ * @brief Specialization for zero-dimensional gttl::MultiIndex.
+ */
 template <>
 class MultiIndex<0, Dimensions<0>{}>
 {

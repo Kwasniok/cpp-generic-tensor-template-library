@@ -1,6 +1,6 @@
 /**
  * @file
- * @brief
+ * @brief bounded natural number index
  */
 
 #ifndef GTTL_INDEX_HPP
@@ -12,16 +12,24 @@
 namespace gttl
 {
 
+/**
+ * @brief Bounded natural number index.
+ * @note  The index value is in `0..(DIMENSION - 1)` at all times.
+ */
 template <Dimension DIMENSION>
 
 requires(DIMENSION > 0) class Index
 {
   public:
-    using type = Index<DIMENSION>;
+    /* @brief Dimension of the index set (every index is less than this) */
     constexpr static Dimension dimension{DIMENSION};
 
   private:
-    Dimension value{0}; // invariance: be in 0..(DIMENSION - 1)
+    /*
+     * @brief Value of index.
+     * @note  Must be in `0..(DIMENSION - 1)`
+     */
+    Dimension value{0};
 
   public:
     constexpr Index() = default;
@@ -33,11 +41,19 @@ requires(DIMENSION > 0) class Index
     operator=(Index&&) = default;
     constexpr ~Index() = default;
 
+    /**
+     * @brief Construct from value.
+     * @note Index value will be `value % DIMENSION`.
+     */
     constexpr explicit Index(const Dimension value)
         : value{static_cast<Dimension>(value % DIMENSION)}
     {
     }
 
+    /**
+     * @brief Assign a value.
+     * @note Index value will be `value % DIMENSION`.
+     */
     constexpr Index&
     operator=(const Dimension val)
     {
@@ -46,7 +62,11 @@ requires(DIMENSION > 0) class Index
     }
 
   public:
-    // it is trusted that 0 <= value < DIMENSION
+    /**
+     * @brief Construct from TRSUTED value.
+     * @note Trusted value MUST be in `0..(DIMENSION-1)` or else the result is
+     *       undefined.
+     */
     constexpr Index(const Dimension value, const internal::Trusted)
         : value(value)
     {

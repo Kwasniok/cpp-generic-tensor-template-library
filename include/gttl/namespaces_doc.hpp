@@ -1,6 +1,6 @@
 /**
  * @file
- * @brief This file is for documentation of namespaces only.
+ * @brief documentation of namespaces
  */
 
 /**

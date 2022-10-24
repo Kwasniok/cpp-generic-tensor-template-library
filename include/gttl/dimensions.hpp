@@ -1,7 +1,7 @@
 
 /**
  * @file
- * @brief
+ * @brief dimensions
  */
 
 #ifndef GTTL_DIMENSIONS_HPP
@@ -16,6 +16,7 @@ namespace gttl
 // MAINTENANCE: Change this to various kinds of unsigned integral built-in types
 //              to ensure code quality.
 // MAINTENANCE: Make this part of a global configuration.
+/** @brief Type for dimensions. */
 using Dimension = std::size_t;
 
 template <std::size_t RANK>
