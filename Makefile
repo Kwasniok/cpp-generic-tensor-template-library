@@ -3,6 +3,7 @@ INC:=include
 BLD:=build
 TEST:=test
 EXS:=examples
+PLG:=playground
 
 # general includes
 INCLUDES= \
@@ -111,4 +112,18 @@ check_tidy:
 	-std=c++20 \
 	$(INCLUDES) \
 
+ ### PLAYGROUND ###
+.PHONY: playground
+playground: $(BLD)/playground
+
+$(BLD)/playground.d: $(PLG)/playground.cpp
+	@mkdir -p $(@D) # provide parent directory of target
+	$(CPP) $(CPP_FLAGS) -MM -MQ $@ -o $@ $<
+
+$(BLD)/playground: $(PLG)/playground.cpp $(BLD)/playground.d
+	@mkdir -p $(@D) # provide parent directory of target
+	$(CPP) $(CPP_FLAGS) -o $@ $< 
+
+# import dependencies for binary
+include $(BLD)/playground.d
  
