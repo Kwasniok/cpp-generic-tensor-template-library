@@ -410,6 +410,36 @@ requires(
         }
         return res;
     }
+
+    constexpr Tensor&
+    operator+=(const Tensor& rhs)
+    {
+        this->inplace_elementwise(typename Traits::add{}, rhs);
+        return *this;
+    }
+
+    constexpr Tensor&
+    operator-=(const Tensor& rhs)
+    {
+        this->inplace_elementwise(typename Traits::sub{}, rhs);
+        return *this;
+    }
+
+    // note: avoid *= due to confusion with other products
+    constexpr Tensor&
+    inplace_elem_mul(const Tensor& rhs)
+    {
+        this->inplace_elementwise(typename Traits::mul{}, rhs);
+        return *this;
+    }
+
+    // note: avoid /= since it is not common mathematical operation
+    constexpr Tensor&
+    inplace_elem_div(const Tensor& rhs)
+    {
+        this->inplace_elementwise(typename Traits::div{}, rhs);
+        return *this;
+    }
 };
 
 static_assert(

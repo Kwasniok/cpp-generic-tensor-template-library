@@ -813,3 +813,143 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(elementwise_2vectors, Scalar, scalar_types)
         std::begin(res), std::end(res), std::begin(values), std::end(values)
     );
 }
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(plus_assignment_scalars, Scalar, scalar_types)
+{
+    constexpr gttl::Dimensions<0> dims{};
+    gttl::Tensor<Scalar, 0, dims> tensor0{4};
+    gttl::Tensor<Scalar, 0, dims> tensor1{5};
+    std::array<Scalar, 1> values{9};
+
+    tensor0 += tensor1;
+
+    BOOST_CHECK_EQUAL_COLLECTIONS(
+        std::begin(tensor0),
+        std::end(tensor0),
+        std::begin(values),
+        std::end(values)
+    );
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(plus_assignment_vectors, Scalar, scalar_types)
+{
+    constexpr gttl::Dimensions<1> dims{3_D};
+    gttl::Tensor<Scalar, 1, dims> tensor0{1, 2, 3};
+    gttl::Tensor<Scalar, 1, dims> tensor1{4, 5, 6};
+    std::array<Scalar, 3> values{5, 7, 9};
+
+    tensor0 += tensor1;
+
+    BOOST_CHECK_EQUAL_COLLECTIONS(
+        std::begin(tensor0),
+        std::end(tensor0),
+        std::begin(values),
+        std::end(values)
+    );
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(minus_assignment_scalars, Scalar, scalar_types)
+{
+    constexpr gttl::Dimensions<0> dims{};
+    gttl::Tensor<Scalar, 0, dims> tensor0{4};
+    gttl::Tensor<Scalar, 0, dims> tensor1{5};
+    std::array<Scalar, 1> values{-1};
+
+    tensor0 -= tensor1;
+
+    BOOST_CHECK_EQUAL_COLLECTIONS(
+        std::begin(tensor0),
+        std::end(tensor0),
+        std::begin(values),
+        std::end(values)
+    );
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(minus_assignment_vectors, Scalar, scalar_types)
+{
+    constexpr gttl::Dimensions<1> dims{3_D};
+    gttl::Tensor<Scalar, 1, dims> tensor0{1, 2, 3};
+    gttl::Tensor<Scalar, 1, dims> tensor1{4, 5, 6};
+    std::array<Scalar, 3> values{-3, -3, -3};
+
+    tensor0 -= tensor1;
+
+    BOOST_CHECK_EQUAL_COLLECTIONS(
+        std::begin(tensor0),
+        std::end(tensor0),
+        std::begin(values),
+        std::end(values)
+    );
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(inplace_elem_mul_scalars, Scalar, scalar_types)
+{
+    constexpr gttl::Dimensions<0> dims{};
+    gttl::Tensor<Scalar, 0, dims> tensor0{4};
+    gttl::Tensor<Scalar, 0, dims> tensor1{5};
+    std::array<Scalar, 1> values{20};
+
+    tensor0.inplace_elem_mul(tensor1);
+
+    BOOST_CHECK_EQUAL_COLLECTIONS(
+        std::begin(tensor0),
+        std::end(tensor0),
+        std::begin(values),
+        std::end(values)
+    );
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(inplace_elem_mul_vectors, Scalar, scalar_types)
+{
+    constexpr gttl::Dimensions<1> dims{3_D};
+    gttl::Tensor<Scalar, 1, dims> tensor0{1, 2, 3};
+    gttl::Tensor<Scalar, 1, dims> tensor1{4, 5, 6};
+    std::array<Scalar, 3> values{4, 10, 18};
+
+    tensor0.inplace_elem_mul(tensor1);
+
+    BOOST_CHECK_EQUAL_COLLECTIONS(
+        std::begin(tensor0),
+        std::end(tensor0),
+        std::begin(values),
+        std::end(values)
+    );
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(inplace_elem_div_scalars, Scalar, scalar_types)
+{
+    constexpr gttl::Dimensions<0> dims{};
+    gttl::Tensor<Scalar, 0, dims> tensor0{4};
+    gttl::Tensor<Scalar, 0, dims> tensor1{5};
+    std::array<Scalar, 1> values{Scalar{4} / Scalar{5}};
+
+    tensor0.inplace_elem_div(tensor1);
+
+    BOOST_CHECK_EQUAL_COLLECTIONS(
+        std::begin(tensor0),
+        std::end(tensor0),
+        std::begin(values),
+        std::end(values)
+    );
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(inplace_elem_div_vectors, Scalar, scalar_types)
+{
+    constexpr gttl::Dimensions<1> dims{3_D};
+    gttl::Tensor<Scalar, 1, dims> tensor0{1, 2, 3};
+    gttl::Tensor<Scalar, 1, dims> tensor1{4, 5, 6};
+    std::array<Scalar, 3> values{
+        Scalar{1} / Scalar{4},
+        Scalar{2} / Scalar{5},
+        Scalar{3} / Scalar{6},
+    };
+
+    tensor0.inplace_elem_div(tensor1);
+
+    BOOST_CHECK_EQUAL_COLLECTIONS(
+        std::begin(tensor0),
+        std::end(tensor0),
+        std::begin(values),
+        std::end(values)
+    );
+}
