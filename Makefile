@@ -101,13 +101,21 @@ $(EXAMPLES): $(BLD)/%: $(EXS)/%.cpp $(BLD)/%.d
 include $(EXAMPLES_DEPENDS)
 
 ### CLANG-TIDY ###
-ALL_SOURCE_FILES = $(shell find $(INC) $(TEST) -iname *.hpp -o -iname *.cpp)
+ALL_INCLUDE_SOURCE_FILES = $(shell find $(INC)  -iname *.hpp -o -iname *.cpp)
+ALL_TEST_SOURCE_FILES = $(shell find $(TEST) -iname *.hpp -o -iname *.cpp)
 
 .PHONY: check_tidy
 check_tidy:
 	clang-tidy \
 	--warnings-as-errors="*" \
-	$(ALL_SOURCE_FILES) \
+	$(ALL_INCLUDE_SOURCE_FILES) \
+	-- \
+	-std=c++20 \
+	$(INCLUDES) \
+
+	clang-tidy \
+	--warnings-as-errors="*" \
+	$(ALL_TEST_SOURCE_FILES) \
 	-- \
 	-std=c++20 \
 	$(INCLUDES) \
