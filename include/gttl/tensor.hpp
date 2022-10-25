@@ -442,6 +442,17 @@ requires(
         return *this;
     }
 
+    /**
+     * @brief in-place scalar multiplication
+     */
+    constexpr Tensor&
+    operator*=(const Scalar& rhs)
+    {
+        const auto f = [fac = rhs](const Scalar& x) { return x * fac; };
+        this->inplace_elementwise(f);
+        return *this;
+    }
+
     constexpr Tensor
     operator+(const Tensor& rhs) const
     {
@@ -470,6 +481,16 @@ requires(
     operator-() const
     {
         return this->elementwise(typename Traits::neg{});
+    }
+
+    /**
+     * @brief scalar multiplication
+     */
+    constexpr Tensor
+    operator*(const Scalar& rhs) const
+    {
+        const auto f = [fac = rhs](const Scalar& x) { return x * fac; };
+        return this->elementwise(f);
     }
 };
 

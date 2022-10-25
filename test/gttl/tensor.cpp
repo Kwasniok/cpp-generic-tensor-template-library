@@ -954,6 +954,44 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(inplace_elem_div_vectors, Scalar, scalar_types)
     );
 }
 
+BOOST_AUTO_TEST_CASE_TEMPLATE(
+    multiplies_assignment_scalar_scalar, Scalar, scalar_types
+)
+{
+    constexpr gttl::Dimensions<0> dims{};
+    gttl::Tensor<Scalar, 0, dims> tensor{2};
+    const Scalar fac{7};
+    std::array<Scalar, 1> values{14};
+
+    tensor *= fac;
+
+    BOOST_CHECK_EQUAL_COLLECTIONS(
+        std::begin(tensor),
+        std::end(tensor),
+        std::begin(values),
+        std::end(values)
+    );
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(
+    multiplies_assignment_vector_scalar, Scalar, scalar_types
+)
+{
+    constexpr gttl::Dimensions<1> dims{3_D};
+    gttl::Tensor<Scalar, 1, dims> tensor{1, 2, 3};
+    const Scalar fac{7};
+    std::array<Scalar, 3> values{7, 14, 21};
+
+    tensor *= fac;
+
+    BOOST_CHECK_EQUAL_COLLECTIONS(
+        std::begin(tensor),
+        std::end(tensor),
+        std::begin(values),
+        std::end(values)
+    );
+}
+
 BOOST_AUTO_TEST_CASE_TEMPLATE(plus_scalars, Scalar, scalar_types)
 {
     constexpr gttl::Dimensions<0> dims{};
@@ -1100,6 +1138,36 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(negate_vector, Scalar, scalar_types)
     std::array<Scalar, 3> values{-1, -2, -3};
 
     T res = -tensor;
+
+    BOOST_CHECK_EQUAL_COLLECTIONS(
+        std::begin(res), std::end(res), std::begin(values), std::end(values)
+    );
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(multiplies_scalar_scalar, Scalar, scalar_types)
+{
+    constexpr gttl::Dimensions<0> dims{};
+    using T = gttl::Tensor<Scalar, 0, dims>;
+    const T tensor{2};
+    const Scalar fac{7};
+    std::array<Scalar, 1> values{14};
+
+    T res = tensor * fac;
+
+    BOOST_CHECK_EQUAL_COLLECTIONS(
+        std::begin(res), std::end(res), std::begin(values), std::end(values)
+    );
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(multiplies_vector_scalar, Scalar, scalar_types)
+{
+    constexpr gttl::Dimensions<1> dims{3_D};
+    using T = gttl::Tensor<Scalar, 1, dims>;
+    T tensor{1, 2, 3};
+    const Scalar fac{7};
+    std::array<Scalar, 3> values{7, 14, 21};
+
+    T res = tensor * fac;
 
     BOOST_CHECK_EQUAL_COLLECTIONS(
         std::begin(res), std::end(res), std::begin(values), std::end(values)
