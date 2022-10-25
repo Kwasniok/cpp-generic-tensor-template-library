@@ -10,6 +10,16 @@ namespace bmpl = boost::mpl;
 using gttl::literals::operator"" _D;
 using scalar_types = bmpl::list<float, double, long double>;
 
+constexpr auto square = [](const auto& x) constexpr
+{
+    return x * x;
+};
+
+constexpr auto add = [](const auto& x, const auto& y) constexpr
+{
+    return x + y;
+};
+
 BOOST_AUTO_TEST_CASE_TEMPLATE(default_constructor_scalar, Scalar, scalar_types)
 {
     constexpr gttl::Dimensions<0> dims{};
@@ -701,5 +711,127 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(
         // note: compare as arrays for proper floating-point comparison
         BOOST_TEST(A(tensor.at(mi)) == A(values[i]));
         ++i;
+    }
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(inplace_elementwise_scalar, Scalar, scalar_types)
+{
+    constexpr gttl::Dimensions<0> dims{};
+    gttl::Tensor<Scalar, 0, dims> tensor{5};
+    std::array<Scalar, 1> values{25};
+
+    tensor.inplace_elementwise(square);
+
+    BOOST_CHECK_EQUAL_COLLECTIONS(
+        std::begin(tensor),
+        std::end(tensor),
+        std::begin(values),
+        std::end(values)
+    );
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(inplace_elementwise_vector, Scalar, scalar_types)
+{
+    constexpr gttl::Dimensions<1> dims{3_D};
+    gttl::Tensor<Scalar, 1, dims> tensor{1, 2, 3};
+    std::array<Scalar, 3> values{1, 4, 9};
+
+    tensor.inplace_elementwise(square);
+
+    BOOST_CHECK_EQUAL_COLLECTIONS(
+        std::begin(tensor),
+        std::end(tensor),
+        std::begin(values),
+        std::end(values)
+    );
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(
+    inplace_elementwise_2scalars, Scalar, scalar_types
+)
+{
+    constexpr gttl::Dimensions<0> dims{};
+    gttl::Tensor<Scalar, 0, dims> tensor0{4};
+    gttl::Tensor<Scalar, 0, dims> tensor1{5};
+    std::array<Scalar, 1> values{9};
+
+    tensor0.inplace_elementwise(add, tensor1);
+
+    BOOST_CHECK_EQUAL_COLLECTIONS(
+        std::begin(tensor0),
+        std::end(tensor0),
+        std::begin(values),
+        std::end(values)
+    );
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(
+    inplace_elementwise_2vectors, Scalar, scalar_types
+)
+{
+    constexpr gttl::Dimensions<1> dims{3_D};
+    gttl::Tensor<Scalar, 1, dims> tensor0{1, 2, 3};
+    gttl::Tensor<Scalar, 1, dims> tensor1{4, 5, 6};
+    std::array<Scalar, 3> values{5, 7, 9};
+
+    tensor0.inplace_elementwise(add, tensor1);
+
+    BOOST_CHECK_EQUAL_COLLECTIONS(
+        std::begin(tensor0),
+        std::end(tensor0),
+        std::begin(values),
+        std::end(values)
+    );
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(elementwise_2scalars, Scalar, scalar_types)
+{
+    constexpr gttl::Dimensions<0> dims{};
+    using T = gttl::Tensor<Scalar, 0, dims>;
+    T tensor1{4};
+    T tensor2{5};
+    std::array<Scalar, 1> values{9};
+
+    // member function
+    {
+        T res = tensor1.elementwise(add, tensor2);
+
+        BOOST_CHECK_EQUAL_COLLECTIONS(
+            std::begin(res), std::end(res), std::begin(values), std::end(values)
+        );
+    }
+    // standalone function
+    {
+        T res = elementwise<Scalar, 0, dims>(add, tensor1, tensor2);
+
+        BOOST_CHECK_EQUAL_COLLECTIONS(
+            std::begin(res), std::end(res), std::begin(values), std::end(values)
+        );
+    }
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(elementwise_2vectors, Scalar, scalar_types)
+{
+    constexpr gttl::Dimensions<1> dims{3_D};
+    using T = gttl::Tensor<Scalar, 1, dims>;
+    T tensor1{1, 2, 3};
+    T tensor2{4, 5, 6};
+    std::array<Scalar, 3> values{5, 7, 9};
+
+    // member function
+    {
+        T res = tensor1.elementwise(add, tensor2);
+
+        BOOST_CHECK_EQUAL_COLLECTIONS(
+            std::begin(res), std::end(res), std::begin(values), std::end(values)
+        );
+    }
+    // standalone
+    {
+        T res = elementwise<Scalar, 1, dims>(add, tensor1, tensor2);
+
+        BOOST_CHECK_EQUAL_COLLECTIONS(
+            std::begin(res), std::end(res), std::begin(values), std::end(values)
+        );
     }
 }

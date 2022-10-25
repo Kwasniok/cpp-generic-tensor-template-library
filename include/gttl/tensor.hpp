@@ -7,7 +7,10 @@
 #ifndef GTTL_TENSOR_HPP
 #define GTTL_TENSOR_HPP
 
+#include <concepts>
+
 #include "dimensions.hpp"
+#include "field_traits.hpp"
 #include "multi_index.hpp"
 #include "multi_index_range.hpp"
 
@@ -15,10 +18,15 @@ namespace gttl
 {
 
 /**
+ * Tensor in standard representation as array of scalar values.
  * @note Is a standard layout struct.
  * @note Is an aggregate type.
  */
-template <typename Scalar, std::size_t RANK, Dimensions<RANK> DIMENSIONS>
+template <
+    typename Scalar,
+    std::size_t RANK,
+    Dimensions<RANK> DIMENSIONS,
+    typename Traits = field_traits<Scalar>>
 
 requires(
     (RANK >= 0) && cexpr::array::all_strictly_positive(DIMENSIONS)
@@ -342,6 +350,66 @@ requires(
     {
         return coefficients[0];
     }
+
+    constexpr Tensor&
+    inplace_elementwise(auto op)
+    {
+        for (auto& c : coefficients) {
+            c = op(c);
+        }
+        return *this;
+    }
+
+    /*
+     * @brief in-place elementwise application of (n+1)-ary operation on scalars
+     * @note `this` is the implicit first argument.
+     * @note `this` is the storage location.
+     */
+    template <
+        // all operands must be tensors of same type
+        std::same_as<Tensor>... Ts>
+
+    constexpr Tensor&
+    inplace_elementwise(auto op, const Ts&... xs) requires requires
+    {
+        // check if op is n-ary scalar operation
+        // clang-format off
+    { op(coefficients[0], xs.coefficients[0]...) } -> std::same_as<Scalar>;
+        // clang-format on
+    }
+
+    {
+        for (std::size_t i{0}; i < size; ++i) {
+            coefficients[i] = op(coefficients[i], xs.coefficients[i]...);
+        }
+        return *this;
+    }
+
+    /*
+     * @brief elementwise application of (n+1)-ary operation on scalars
+     * @note `this` is the implicit first argument.
+     * @note The return value is the storage location.
+     */
+    template <
+        // all operands must be tensors of same type
+        std::same_as<Tensor>... Ts>
+
+    constexpr Tensor
+    elementwise(auto op, const Ts&... xs) const requires requires
+    {
+        // check if op is n-ary scalar operation
+        // clang-format off
+    { op(coefficients[0], xs.coefficients[0]...) } -> std::same_as<Scalar>;
+        // clang-format on
+    }
+
+    {
+        Tensor res; // initialization is NOT required!
+        for (std::size_t i{0}; i < size; ++i) {
+            res.coefficients[i] = op(coefficients[i], xs.coefficients[i]...);
+        }
+        return res;
+    }
 };
 
 static_assert(
@@ -372,6 +440,36 @@ static_assert(
         Tensor<float, 2, Dimensions<2>{Dimension{3}, Dimension{3}}>>,
     "Tensor must be an aggregate type."
 );
+
+/*
+ * @brief elementwise application of n-ary operation on scalars
+ * @note Prefer member function Tensor::elementwise over this if possible.
+ */
+template <
+    typename Scalar,
+    std::size_t RANK,
+    Dimensions<RANK> DIMENSIONS,
+    typename Traits = field_traits<Scalar>,
+    // all operands must be tensors of same type
+    std::same_as<Tensor<Scalar, RANK, DIMENSIONS, Traits>>... Ts>
+
+constexpr Tensor<Scalar, RANK, DIMENSIONS, Traits>
+elementwise(auto op, const Ts&... xs) requires requires
+{
+    // check if op is n-ary scalar operation
+    // clang-format off
+    { op(xs.coefficients[0]...) } -> std::same_as<Scalar>;
+    // clang-format on
+}
+
+{
+    using T = Tensor<Scalar, RANK, DIMENSIONS, Traits>;
+    T res; // initialization is NOT required!
+    for (std::size_t i{0}; i < T::size; ++i) {
+        res.coefficients[i] = op(xs.coefficients[i]...);
+    }
+    return res;
+}
 
 } // namespace gttl
 
