@@ -32,7 +32,7 @@ ifeq ($(DEBUG), 1)
     CPP_FLAGS += -O0 -DDEBUG
     BLD:=$(BLD)/debug
 else
-    CPP_FLAGS += -O2 -march=native
+    CPP_FLAGS += -O3 -march=native
 endif
 
 ### DEFAULT ###
@@ -126,4 +126,3 @@ $(BLD)/playground: $(PLG)/playground.cpp $(BLD)/playground.d
 
 # import dependencies for binary
 include $(BLD)/playground.d
- 
