@@ -1,7 +1,8 @@
 
 INC:=include
-TEST:=test
 BLD:=build
+TEST:=test
+EXS:=examples
 
 # general includes
 INCLUDES= \
@@ -40,7 +41,7 @@ default: test
 
 ### ALL ###
 .PHONY: all
-all: test doc
+all: test doc examples
 
 ### CLEAN ##
 .PHONY:clean
@@ -77,9 +78,30 @@ $(TESTS): $(BLD)/%: $(TEST)/%.cpp $(BLD)/%.d
 # import dependencies for all target binaries
 include $(TEST_DEPENDS)
 
-ALL_SOURCE_FILES = $(shell find $(INC) $(TEST) -iname *.hpp -o -iname *.cpp)
+### EXAMPLES ###
+
+EXAMPLES_SOURCES = $(shell find $(EXS) -name '*.cpp')
+EXAMPLES_DEPENDS = $(EXAMPLES_SOURCES:$(EXS)/%.cpp=$(BLD)/%.d)
+EXAMPLES_BINARIES = $(EXAMPLES_SOURCES:$(EXS)/%.cpp=$(BLD)/%)
+EXAMPLES = $(filter $(BLD)/%, $(EXAMPLES_BINARIES))
+
+.PHONY: examples
+examples: $(EXAMPLES);
+
+$(EXAMPLES_DEPENDS): $(BLD)/%.d: $(EXS)/%.cpp
+	@mkdir -p $(@D) # provide parent directory of target
+	$(CPP) $(CPP_FLAGS) -MM -MQ $@ -o $@ $<
+
+$(EXAMPLES): $(BLD)/%: $(EXS)/%.cpp $(BLD)/%.d
+	@mkdir -p $(@D) # provide parent directory of target
+	$(CPP) $(CPP_FLAGS) -o $@ $<
+
+# import dependencies for all target binaries
+include $(EXAMPLES_DEPENDS)
 
 ### CLANG-TIDY ###
+ALL_SOURCE_FILES = $(shell find $(INC) $(TEST) -iname *.hpp -o -iname *.cpp)
+
 .PHONY: check_tidy
 check_tidy:
 	clang-tidy \
