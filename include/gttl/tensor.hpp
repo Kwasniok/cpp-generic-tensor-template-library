@@ -441,36 +441,6 @@ static_assert(
     "Tensor must be an aggregate type."
 );
 
-/*
- * @brief elementwise application of n-ary operation on scalars
- * @note Prefer member function Tensor::elementwise over this if possible.
- */
-template <
-    typename Scalar,
-    std::size_t RANK,
-    Dimensions<RANK> DIMENSIONS,
-    typename Traits = field_traits<Scalar>,
-    // all operands must be tensors of same type
-    std::same_as<Tensor<Scalar, RANK, DIMENSIONS, Traits>>... Ts>
-
-constexpr Tensor<Scalar, RANK, DIMENSIONS, Traits>
-elementwise(auto op, const Ts&... xs) requires requires
-{
-    // check if op is n-ary scalar operation
-    // clang-format off
-    { op(xs.coefficients[0]...) } -> std::same_as<Scalar>;
-    // clang-format on
-}
-
-{
-    using T = Tensor<Scalar, RANK, DIMENSIONS, Traits>;
-    T res; // initialization is NOT required!
-    for (std::size_t i{0}; i < T::size; ++i) {
-        res.coefficients[i] = op(xs.coefficients[i]...);
-    }
-    return res;
-}
-
 } // namespace gttl
 
 #endif

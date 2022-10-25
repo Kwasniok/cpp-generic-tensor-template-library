@@ -792,22 +792,11 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(elementwise_2scalars, Scalar, scalar_types)
     T tensor2{5};
     std::array<Scalar, 1> values{9};
 
-    // member function
-    {
-        T res = tensor1.elementwise(add, tensor2);
+    T res = tensor1.elementwise(add, tensor2);
 
-        BOOST_CHECK_EQUAL_COLLECTIONS(
-            std::begin(res), std::end(res), std::begin(values), std::end(values)
-        );
-    }
-    // standalone function
-    {
-        T res = elementwise<Scalar, 0, dims>(add, tensor1, tensor2);
-
-        BOOST_CHECK_EQUAL_COLLECTIONS(
-            std::begin(res), std::end(res), std::begin(values), std::end(values)
-        );
-    }
+    BOOST_CHECK_EQUAL_COLLECTIONS(
+        std::begin(res), std::end(res), std::begin(values), std::end(values)
+    );
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(elementwise_2vectors, Scalar, scalar_types)
@@ -818,20 +807,9 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(elementwise_2vectors, Scalar, scalar_types)
     T tensor2{4, 5, 6};
     std::array<Scalar, 3> values{5, 7, 9};
 
-    // member function
-    {
-        T res = tensor1.elementwise(add, tensor2);
+    T res = tensor1.elementwise(add, tensor2);
 
-        BOOST_CHECK_EQUAL_COLLECTIONS(
-            std::begin(res), std::end(res), std::begin(values), std::end(values)
-        );
-    }
-    // standalone
-    {
-        T res = elementwise<Scalar, 1, dims>(add, tensor1, tensor2);
-
-        BOOST_CHECK_EQUAL_COLLECTIONS(
-            std::begin(res), std::end(res), std::begin(values), std::end(values)
-        );
-    }
+    BOOST_CHECK_EQUAL_COLLECTIONS(
+        std::begin(res), std::end(res), std::begin(values), std::end(values)
+    );
 }
