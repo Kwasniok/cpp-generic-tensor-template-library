@@ -440,6 +440,36 @@ requires(
         this->inplace_elementwise(typename Traits::div{}, rhs);
         return *this;
     }
+
+    constexpr Tensor
+    operator+(const Tensor& rhs) const
+    {
+        return this->elementwise(typename Traits::add{}, rhs);
+    }
+
+    constexpr Tensor
+    operator-(const Tensor& rhs) const
+    {
+        return this->elementwise(typename Traits::sub{}, rhs);
+    }
+
+    constexpr Tensor
+    elem_mul(const Tensor& rhs) const
+    {
+        return this->elementwise(typename Traits::mul{}, rhs);
+    }
+
+    constexpr Tensor
+    elem_div(const Tensor& rhs) const
+    {
+        return this->elementwise(typename Traits::div{}, rhs);
+    }
+
+    constexpr Tensor
+    operator-() const
+    {
+        return this->elementwise(typename Traits::neg{});
+    }
 };
 
 static_assert(

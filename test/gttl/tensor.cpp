@@ -953,3 +953,155 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(inplace_elem_div_vectors, Scalar, scalar_types)
         std::end(values)
     );
 }
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(plus_scalars, Scalar, scalar_types)
+{
+    constexpr gttl::Dimensions<0> dims{};
+    using T = gttl::Tensor<Scalar, 0, dims>;
+    const T tensor1{4};
+    const T tensor2{5};
+    std::array<Scalar, 1> values{9};
+
+    T res = tensor1 + tensor2;
+
+    BOOST_CHECK_EQUAL_COLLECTIONS(
+        std::begin(res), std::end(res), std::begin(values), std::end(values)
+    );
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(plus_vectors, Scalar, scalar_types)
+{
+    constexpr gttl::Dimensions<1> dims{3_D};
+    using T = gttl::Tensor<Scalar, 1, dims>;
+    const T tensor1{1, 2, 3};
+    const T tensor2{4, 5, 6};
+    std::array<Scalar, 3> values{5, 7, 9};
+
+    T res = tensor1 + tensor2;
+
+    BOOST_CHECK_EQUAL_COLLECTIONS(
+        std::begin(res), std::end(res), std::begin(values), std::end(values)
+    );
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(minus_scalars, Scalar, scalar_types)
+{
+    constexpr gttl::Dimensions<0> dims{};
+    using T = gttl::Tensor<Scalar, 0, dims>;
+    const T tensor1{4};
+    const T tensor2{5};
+    std::array<Scalar, 1> values{-1};
+
+    T res = tensor1 - tensor2;
+
+    BOOST_CHECK_EQUAL_COLLECTIONS(
+        std::begin(res), std::end(res), std::begin(values), std::end(values)
+    );
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(minus_vectors, Scalar, scalar_types)
+{
+    constexpr gttl::Dimensions<1> dims{3_D};
+    using T = gttl::Tensor<Scalar, 1, dims>;
+    const T tensor1{1, 2, 3};
+    const T tensor2{4, 5, 6};
+    std::array<Scalar, 3> values{-3, -3, -3};
+
+    T res = tensor1 - tensor2;
+
+    BOOST_CHECK_EQUAL_COLLECTIONS(
+        std::begin(res), std::end(res), std::begin(values), std::end(values)
+    );
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(elem_mul_scalars, Scalar, scalar_types)
+{
+    constexpr gttl::Dimensions<0> dims{};
+    using T = gttl::Tensor<Scalar, 0, dims>;
+    const T tensor1{4};
+    const T tensor2{5};
+    std::array<Scalar, 1> values{20};
+
+    T res = tensor1.elem_mul(tensor2);
+
+    BOOST_CHECK_EQUAL_COLLECTIONS(
+        std::begin(res), std::end(res), std::begin(values), std::end(values)
+    );
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(elem_mul_vectors, Scalar, scalar_types)
+{
+    constexpr gttl::Dimensions<1> dims{3_D};
+    using T = gttl::Tensor<Scalar, 1, dims>;
+    const T tensor1{1, 2, 3};
+    const T tensor2{4, 5, 6};
+    std::array<Scalar, 3> values{4, 10, 18};
+
+    T res = tensor1.elem_mul(tensor2);
+
+    BOOST_CHECK_EQUAL_COLLECTIONS(
+        std::begin(res), std::end(res), std::begin(values), std::end(values)
+    );
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(elem_div_scalars, Scalar, scalar_types)
+{
+    constexpr gttl::Dimensions<0> dims{};
+    using T = gttl::Tensor<Scalar, 0, dims>;
+    const T tensor1{4};
+    const T tensor2{5};
+    std::array<Scalar, 1> values{Scalar{4} / Scalar{5}};
+
+    T res = tensor1.elem_div(tensor2);
+
+    BOOST_CHECK_EQUAL_COLLECTIONS(
+        std::begin(res), std::end(res), std::begin(values), std::end(values)
+    );
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(elem_div_vectors, Scalar, scalar_types)
+{
+    constexpr gttl::Dimensions<1> dims{3_D};
+    using T = gttl::Tensor<Scalar, 1, dims>;
+    const T tensor1{1, 2, 3};
+    const T tensor2{4, 5, 6};
+    std::array<Scalar, 3> values{
+        Scalar{1} / Scalar{4},
+        Scalar{2} / Scalar{5},
+        Scalar{3} / Scalar{6},
+    };
+
+    T res = tensor1.elem_div(tensor2);
+
+    BOOST_CHECK_EQUAL_COLLECTIONS(
+        std::begin(res), std::end(res), std::begin(values), std::end(values)
+    );
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(negate_scalar, Scalar, scalar_types)
+{
+    constexpr gttl::Dimensions<0> dims{};
+    using T = gttl::Tensor<Scalar, 0, dims>;
+    const T tensor{4};
+    std::array<Scalar, 1> values{-4};
+
+    T res = -tensor;
+
+    BOOST_CHECK_EQUAL_COLLECTIONS(
+        std::begin(res), std::end(res), std::begin(values), std::end(values)
+    );
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(negate_vector, Scalar, scalar_types)
+{
+    constexpr gttl::Dimensions<1> dims{3_D};
+    using T = gttl::Tensor<Scalar, 1, dims>;
+    const T tensor{1, 2, 3};
+    std::array<Scalar, 3> values{-1, -2, -3};
+
+    T res = -tensor;
+
+    BOOST_CHECK_EQUAL_COLLECTIONS(
+        std::begin(res), std::end(res), std::begin(values), std::end(values)
+    );
+}
