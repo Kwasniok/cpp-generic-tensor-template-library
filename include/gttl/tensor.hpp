@@ -8,6 +8,7 @@
 #define GTTL_TENSOR_HPP
 
 #include <concepts>
+#include <iostream>
 
 #include "dimensions.hpp"
 #include "field_traits.hpp"
@@ -500,6 +501,35 @@ static_assert(
         Tensor<float, 2, Dimensions<2>{Dimension{3}, Dimension{3}}>>,
     "Tensor must be an aggregate type."
 );
+
+template <
+    typename Scalar,
+    std::size_t RANK,
+    Dimensions<RANK> DIMENSIONS,
+    typename Traits>
+std::ostream&
+operator<<(
+    std::ostream& os, const Tensor<Scalar, RANK, DIMENSIONS, Traits>& x
+) requires(RANK > 0)
+{
+    os << '{';
+    os << x[0];
+    for (std::size_t i{1}; i < DIMENSIONS[0]; ++i) {
+        os << ',' << x[i];
+    }
+    os << '}';
+    return os;
+}
+
+template <typename Scalar, typename Traits>
+std::ostream&
+operator<<(
+    std::ostream& os, const Tensor<Scalar, 0, Dimensions<0>{}, Traits>& x
+)
+{
+    os << x.coefficients[0];
+    return os;
+}
 
 } // namespace gttl
 
