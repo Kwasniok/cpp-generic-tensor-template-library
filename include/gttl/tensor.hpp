@@ -201,9 +201,12 @@ requires(
             sizeof(SubTensor) == sizeof(SubTensor::coefficients),
             "`coefficients`must be only non-static data member of SubTensor"
         );
+        // reinterpret cast is checked above
+        // NOLINTBEGIN(cppcoreguidelines-pro-type-reinterpret-cast)
         const std::array<SubTensor, DIMENSIONS[0]>& subtensors =
             reinterpret_cast<const std::array<SubTensor, DIMENSIONS[0]>&>(*this
             );
+        // NOLINTEND(cppcoreguidelines-pro-type-reinterpret-cast)
         if constexpr (sizeof...(Ts) == 0) {
             return subtensors.at(i_first);
         } else {
@@ -235,8 +238,11 @@ requires(
             sizeof(SubTensor) == sizeof(SubTensor::coefficients),
             "`coefficients`must be only non-static data member of SubTensor"
         );
+        // reinterpret cast is checked above
+        // NOLINTBEGIN(cppcoreguidelines-pro-type-reinterpret-cast)
         std::array<SubTensor, DIMENSIONS[0]>& subtensors =
             reinterpret_cast<std::array<SubTensor, DIMENSIONS[0]>&>(*this);
+        // NOLINTEND(cppcoreguidelines-pro-type-reinterpret-cast)
         if constexpr (sizeof...(Ts) == 0) {
             return subtensors.at(i_first);
         } else {
@@ -266,9 +272,12 @@ requires(
             sizeof(SubTensor) == sizeof(SubTensor::coefficients),
             "`coefficients`must be only non-static data member of SubTensor"
         );
+        // reinterpret cast is checked above
+        // NOLINTBEGIN(cppcoreguidelines-pro-type-reinterpret-cast)
         const std::array<SubTensor, DIMENSIONS[0]>& subtensors =
             reinterpret_cast<const std::array<SubTensor, DIMENSIONS[0]>&>(*this
             );
+        // NOLINTEND(cppcoreguidelines-pro-type-reinterpret-cast)
         return subtensors[i_first];
     }
 
@@ -294,8 +303,11 @@ requires(
             sizeof(SubTensor) == sizeof(SubTensor::coefficients),
             "`coefficients`must be only non-static data member of SubTensor"
         );
+        // reinterpret cast is checked above
+        // NOLINTBEGIN(cppcoreguidelines-pro-type-reinterpret-cast)
         std::array<SubTensor, DIMENSIONS[0]>& subtensors =
             reinterpret_cast<std::array<SubTensor, DIMENSIONS[0]>&>(*this);
+        // NOLINTEND(cppcoreguidelines-pro-type-reinterpret-cast)
         return subtensors[i_first];
     }
 
