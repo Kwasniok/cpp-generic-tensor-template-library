@@ -47,3 +47,25 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_div, Scalar, scalar_types)
 
     BOOST_TEST(op(x, y) == Scalar{4} / Scalar{5});
 }
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(test_neg, Scalar, scalar_types)
+{
+    using Traits = gttl::field_traits<Scalar>;
+    auto op = typename Traits::neg{};
+    auto x = Scalar{4};
+
+    BOOST_TEST(op(x) == -4);
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(test_zero, Scalar, scalar_types)
+{
+    using Traits = gttl::field_traits<Scalar>;
+    BOOST_TEST(Traits::zero == 0);
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(test_one, Scalar, scalar_types)
+{
+
+    using Traits = gttl::field_traits<Scalar>;
+    BOOST_TEST(Traits::one == 1);
+}

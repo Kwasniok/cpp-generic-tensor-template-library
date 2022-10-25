@@ -23,6 +23,7 @@ struct field_traits {
     using sub = std::minus<T>;
     using mul = std::multiplies<T>;
     using div = std::divides<T>;
+    using neg = std::negate<T>;
     constexpr static T zero = static_cast<T>(0);
     constexpr static T one = static_cast<T>(1);
 };
