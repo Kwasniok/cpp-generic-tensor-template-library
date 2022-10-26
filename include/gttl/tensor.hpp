@@ -326,8 +326,7 @@ requires(
         } else {
             // return at(mi.first()).at(mi.rest()); // using operator[] is safe
             // here
-            return (*this)[mi.first()].at(mi.rest()
-            ); // using operator[] is safe here
+            return (*this)[mi.first()].at(mi.rest());
         }
     }
 
@@ -352,8 +351,7 @@ requires(
         } else {
             // return at(mi.first()).at(mi.rest()); // using operator[] is safe
             // here
-            return (*this)[mi.first()].at(mi.rest()
-            ); // using operator[] is safe here
+            return (*this)[mi.first()].at(mi.rest());
         }
     }
 
