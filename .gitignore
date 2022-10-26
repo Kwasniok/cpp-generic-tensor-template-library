@@ -6,3 +6,6 @@ doc/
 
 # editors
 .vscode/
+
+# playground
+playground/
