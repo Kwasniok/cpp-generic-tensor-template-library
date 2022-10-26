@@ -18,6 +18,20 @@ To import parts of the library use
 #include <gttl/<path-to-part>.hpp>
 ```
 
+## Documentation
+To generate the documentation in the folder `doc` run
+```
+make doc
+```
+(see [requirements])
+
+## Tests
+To generate and execute all tests run
+```
+make test
+```
+(see [requirements])
+
 ## Basic Example
 ```cpp
 #include <iostream>
@@ -127,7 +141,11 @@ tensor.at(0, 1, 2, 3, 4)
 - library: `gttl`
 - literal suffixes: `gttl::literals`
 
-## Dependencies
+## Requirements
 - C++20 (for using)
 - C++23 (for testing)
+- make 4.3+ (for documentation and testing)
+- doxygen 1.9+ (for documentation)
 - Boost 1.80+ (for testing)
+
+[requirements]: #requirements
