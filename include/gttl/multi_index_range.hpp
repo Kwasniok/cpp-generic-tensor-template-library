@@ -37,17 +37,17 @@ class MultiIndexRange
     bool overflow{false};
 
   public:
-    MultiIndexRange() = default;
-    MultiIndexRange(const MultiIndexRange&) = default;
-    MultiIndexRange(MultiIndexRange&&) = default;
-    MultiIndexRange&
+    constexpr MultiIndexRange() = default;
+    constexpr MultiIndexRange(const MultiIndexRange&) = default;
+    constexpr MultiIndexRange(MultiIndexRange&&) = default;
+    constexpr MultiIndexRange&
     operator=(const MultiIndexRange&) = default;
-    MultiIndexRange&
+    constexpr MultiIndexRange&
     operator=(MultiIndexRange&&) = default;
-    ~MultiIndexRange() = default;
+    constexpr ~MultiIndexRange() = default;
 
   private:
-    MultiIndexRange(const value_type& value, const bool overflow)
+    constexpr MultiIndexRange(const value_type& value, const bool overflow)
         : value{value}, overflow{overflow}
     {
     }
