@@ -376,7 +376,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(
     get_multi_index_for_index_vector, Scalar, scalar_types
 )
 {
-    constexpr gttl::Dimensions<1> dims{3_D};
+    constexpr static gttl::Dimensions<1> dims{3_D};
     using T = gttl::Tensor<Scalar, 1, dims>;
     using MI = gttl::MultiIndex<1, dims>;
 
@@ -390,7 +390,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(
     get_multi_index_for_index_ten3, Scalar, scalar_types
 )
 {
-    constexpr gttl::Dimensions<3> dims{3_D, 4_D, 5_D};
+    constexpr static gttl::Dimensions<3> dims{3_D, 4_D, 5_D};
     using T = gttl::Tensor<Scalar, 3, dims>;
     using MI = gttl::MultiIndex<3, dims>;
 
