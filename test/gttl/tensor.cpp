@@ -362,6 +362,49 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(make_multi_index_range_ten3, Scalar, scalar_types)
     };
 }
 
+BOOST_AUTO_TEST_CASE_TEMPLATE(
+    get_multi_index_for_index_scalar, Scalar, scalar_types
+)
+{
+    constexpr gttl::Dimensions<0> dims{};
+    [[maybe_unused]] gttl::MultiIndex<0, dims> multi_index{
+        gttl::Tensor<Scalar, 0, dims>::get_multi_index_for_index(0),
+    };
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(
+    get_multi_index_for_index_vector, Scalar, scalar_types
+)
+{
+    constexpr gttl::Dimensions<1> dims{3_D};
+    using T = gttl::Tensor<Scalar, 1, dims>;
+    using MI = gttl::MultiIndex<1, dims>;
+
+    for (std::size_t i{0}; i < 3; ++i) {
+        MI multi_index = T::get_multi_index_for_index(i);
+        BOOST_TEST(multi_index == MI{i});
+    }
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(
+    get_multi_index_for_index_ten3, Scalar, scalar_types
+)
+{
+    constexpr gttl::Dimensions<3> dims{3_D, 4_D, 5_D};
+    using T = gttl::Tensor<Scalar, 3, dims>;
+    using MI = gttl::MultiIndex<3, dims>;
+
+    for (std::size_t i{0}; i < 3; ++i) {
+        for (std::size_t j{0}; j < 4; ++j) {
+            for (std::size_t k{0}; k < 5; ++k) {
+                MI multi_index =
+                    T::get_multi_index_for_index(i * 20 + j * 5 + k);
+                BOOST_TEST(multi_index == (MI{i, j, k}));
+            }
+        }
+    }
+}
+
 BOOST_AUTO_TEST_CASE_TEMPLATE(swap_vector, Scalar, scalar_types)
 {
     constexpr gttl::Dimensions<1> dims{3_D};

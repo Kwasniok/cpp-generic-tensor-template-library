@@ -9,6 +9,7 @@
 
 #include <concepts>
 #include <iostream>
+#include <limits>
 
 #include "dimensions.hpp"
 #include "field_traits.hpp"
@@ -168,6 +169,32 @@ requires(
     make_index_range()
     {
         return {};
+    }
+
+    /*
+     * @brief returns multi-index associated with the index-th coefficient
+     * @note It is asserted but NOT checked that 0 <= index < size.
+     */
+    constexpr static multi_index_type
+    get_multi_index_for_index(std::size_t index)
+    {
+        // MAINTENANCE: consider making this function private/protected
+        if constexpr (RANK == 0) {
+            return {};
+        } else {
+            using SubTensor =
+                Tensor<Scalar, RANK - 1, cexpr::array::rest(DIMENSIONS)>;
+            static_assert(
+                SubTensor::size < std::numeric_limits<Dimension>::max(),
+                "Type Dimension must be large enough to index all top level "
+                "elements."
+            );
+            const Dimension i_first =
+                static_cast<Dimension>(index / SubTensor::size);
+            const std::size_t i_rest{index % SubTensor::size};
+            // note: Implicit modulo operation for i_first in constructor.
+            return {i_first, SubTensor::get_multi_index_for_index(i_rest)};
+        }
     }
 
     constexpr void
