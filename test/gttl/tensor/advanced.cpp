@@ -10,6 +10,9 @@ namespace bmpl = boost::mpl;
 using gttl::literals::operator"" _D;
 using scalar_types = bmpl::list<float, double, long double>;
 
+// There will be a lot of 'magic' numbers here.
+// NOLINTBEGIN(cppcoreguidelines-avoid-magic_numbers)
+
 BOOST_AUTO_TEST_CASE_TEMPLATE(contraction_scalar_scalar, Scalar, scalar_types)
 {
     constexpr gttl::Dimensions<0> dims1{};
@@ -408,3 +411,5 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(contraction_matrix_ten3, Scalar, scalar_types)
         );
     }
 }
+
+// NOLINTEND(cppcoreguidelines-avoid-magic_numbers)

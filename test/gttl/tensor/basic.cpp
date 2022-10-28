@@ -20,6 +20,9 @@ constexpr auto add = [](const auto& x, const auto& y) constexpr
     return x + y;
 };
 
+// There will be a lot of 'magic' numbers here.
+// NOLINTBEGIN(cppcoreguidelines-avoid-magic_numbers)
+
 BOOST_AUTO_TEST_CASE_TEMPLATE(default_constructor_scalar, Scalar, scalar_types)
 {
     constexpr gttl::Dimensions<0> dims{};
@@ -1216,3 +1219,5 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(multiplies_vector_scalar, Scalar, scalar_types)
         std::begin(res), std::end(res), std::begin(values), std::end(values)
     );
 }
+
+// NOLINTEND(cppcoreguidelines-avoid-magic_numbers)
