@@ -85,15 +85,7 @@ template <
     std::size_t RANK,
     std::array<std::size_t, RANK> DIMENSIONS,
     typename Traits>
-// clang-format off
-[[nodiscard]] constexpr Tensor<
-    Scalar,
-    RANK - 2,
-    cexpr::array::multi_erase_at<2, std::array<std::size_t, 2>{i, j}>(
-        DIMENSIONS
-    ),
-    Traits>
-// clang-format on
+[[nodiscard]] constexpr auto
 contraction(const Tensor<Scalar, RANK, DIMENSIONS, Traits>& x) requires(
     (RANK >= 2) && (i < RANK) && (j < RANK) && (i != j) &&
     (DIMENSIONS[i] == DIMENSIONS[j])
