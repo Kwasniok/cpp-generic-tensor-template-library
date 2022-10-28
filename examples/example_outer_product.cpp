@@ -7,7 +7,7 @@ using namespace gttl::literals; // for _D
 
 // custom scalar type
 using Scalar = float; 
-// custome tensor ranks
+// custom tensor ranks
 constexpr std::size_t RANK1{1};
 constexpr std::size_t RANK2{2};
 // custom (non-homogenious) dimensions

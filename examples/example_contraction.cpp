@@ -5,11 +5,11 @@
 
 using namespace gttl::literals; // for _D
 
-// custome scalar type
+// custom scalar type
 using Scalar = float; 
-// custome tensor rank
+// custom tensor rank
 constexpr std::size_t RANK{3};
-// custome (non-homogenious) dimensions
+// custom (non-homogenious) dimensions
 constexpr gttl::Dimensions<RANK> DIMENSIONS{3_D, 2_D, 3_D};
 using Mat3x2x3 = gttl::Tensor<Scalar, RANK, DIMENSIONS>;
 
