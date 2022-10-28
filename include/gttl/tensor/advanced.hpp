@@ -85,7 +85,15 @@ template <
     std::size_t RANK,
     std::array<std::size_t, RANK> DIMENSIONS,
     typename Traits>
-[[nodiscard]] constexpr auto
+// clang-format off
+[[nodiscard]] constexpr Tensor<
+    Scalar,
+    RANK - 2,
+    cexpr::array::multi_erase_at<2, std::array<std::size_t, 2>{i, j}>(
+        DIMENSIONS
+    ),
+    Traits>
+// clang-format on
 contraction(const Tensor<Scalar, RANK, DIMENSIONS, Traits>& x) requires(
     (RANK >= 2) && (i < RANK) && (j < RANK) && (i != j) &&
     (DIMENSIONS[i] == DIMENSIONS[j])
@@ -110,11 +118,11 @@ contraction(const Tensor<Scalar, RANK, DIMENSIONS, Traits>& x) requires(
         auto multi_index{ThisTensor::get_multi_index_for_index(coeff_index)};
         if (multi_index.template get<i>() == multi_index.template get<j>()) {
             // calculate destination
-            auto multi_index_res = multi_index.template multi_erase_at<
+            const auto mi_res = multi_index.template multi_erase_at<
                 2,
                 std::array<std::size_t, 2>{i, j}>();
             // store
-            res.at(multi_index_res) += x.coefficients[coeff_index];
+            res.at(mi_res) += x.coefficients[coeff_index];
         }
     }
 
