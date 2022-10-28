@@ -10,6 +10,174 @@ namespace bmpl = boost::mpl;
 using gttl::literals::operator"" _D;
 using scalar_types = bmpl::list<float, double, long double>;
 
+BOOST_AUTO_TEST_CASE_TEMPLATE(contraction_scalar_scalar, Scalar, scalar_types)
+{
+    constexpr gttl::Dimensions<0> dims1{};
+    constexpr gttl::Dimensions<0> dims2{};
+    constexpr gttl::Dimensions<0> dims_res{};
+    using T1 = gttl::Tensor<Scalar, 0, dims1>;
+    using T2 = gttl::Tensor<Scalar, 0, dims2>;
+    using TRes = gttl::Tensor<Scalar, 0, dims_res>;
+    const T1 tensor1{1};
+    const T2 tensor2{2};
+    std::array<Scalar, 1> values{2};
+
+    TRes res = outer_product(tensor1, tensor2);
+    BOOST_CHECK_EQUAL_COLLECTIONS(
+        std::begin(res), std::end(res), std::begin(values), std::end(values)
+    );
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(contraction_vector_matrix, Scalar, scalar_types)
+{
+    constexpr gttl::Dimensions<1> dims1{2_D};
+    constexpr gttl::Dimensions<2> dims2{3_D, 4_D};
+    using T1 = gttl::Tensor<Scalar, 1, dims1>;
+    using T2 = gttl::Tensor<Scalar, 2, dims2>;
+    const T1 tensor1{1, 2};
+    // clang-format off
+    const T2 tensor2{
+        +10, +20, +30, +40,
+        +50, +60, +70, +80,
+        +90, 100, 110, 120,
+    };
+    // clang-format on
+
+    // vector x matrix
+    {
+        constexpr gttl::Dimensions<3> dims_res{2_D, 3_D, 4_D};
+        using TRes = gttl::Tensor<Scalar, 3, dims_res>;
+
+        // clang-format off
+        std::array<Scalar, 2 * 3 * 4> values{
+            +10, +20, +30, +40,
+            +50, +60, +70, +80,
+            +90, 100, 110, 120,
+
+            +20, +40, +60, +80,
+            100, 120, 140, 160,
+            180, 200, 220, 240,
+        };
+        // clang-format on
+
+        TRes res = outer_product(tensor1, tensor2);
+        BOOST_CHECK_EQUAL_COLLECTIONS(
+            std::begin(res), std::end(res), std::begin(values), std::end(values)
+        );
+    }
+    // matrix x vector
+    {
+        constexpr gttl::Dimensions<3> dims_res{3_D, 4_D, 2_D};
+        using TRes = gttl::Tensor<Scalar, 3, dims_res>;
+
+        // clang-format off
+        std::array<Scalar, 3 * 4 * 2> values{
+            +10, +20,
+            +20, +40,
+            +30, +60,
+            +40, +80,
+
+            +50, 100,
+            +60, 120,
+            +70, 140,
+            +80, 160,
+
+            +90, 180,
+            100, 200,
+            110, 220,
+            120, 240,
+        };
+        // clang-format on
+
+        TRes res = outer_product(tensor2, tensor1);
+        BOOST_CHECK_EQUAL_COLLECTIONS(
+            std::begin(res), std::end(res), std::begin(values), std::end(values)
+        );
+    }
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(contraction_matrix_ten4, Scalar, scalar_types)
+{
+    constexpr gttl::Dimensions<2> dims1{2_D, 3_D};
+    constexpr gttl::Dimensions<4> dims2{3_D, 2_D, 1_D, 4_D};
+    using T1 = gttl::Tensor<Scalar, 2, dims1>;
+    using T2 = gttl::Tensor<Scalar, 4, dims2>;
+    // clang-format off
+    const T1 tensor1{
+        1, 2, 3,
+        4, 5, 6,
+    };
+    const T2 tensor2{
+        +10, +20, +30, +40,
+        +50, +60, +70, +80,
+
+        +90, 100, 110, 120,
+        130, 140, 150, 160,
+
+        170, 180, 190, 200,
+        210, 220, 230, 240,
+    };
+    // clang-format on
+
+    // matrix x rank-4 tensor
+    {
+        constexpr gttl::Dimensions<6> dims_res{2_D, 3_D, 3_D, 2_D, 1_D, 4_D};
+        using TRes = gttl::Tensor<Scalar, 6, dims_res>;
+
+        // clang-format off
+        std::array<Scalar, 2 * 3 * 3 * 2 * 1 * 4> values{
+        +10, +20, +30, +40,
+        +50, +60, +70, +80,
+        +90, 100, 110, 120,
+        130, 140, 150, 160,
+        170, 180, 190, 200,
+        210, 220, 230, 240,
+
+        +20, +40, +60, +80,
+        100, 120, 140, 160,
+        180, 200, 220, 240,
+        260, 280, 300, 320,
+        340, 360, 380, 400,
+        420, 440, 460, 480,
+
+        +30, +60, +90, 120,
+        150, 180, 210, 240,
+        270, 300, 330, 360,
+        390, 420, 450, 480,
+        510, 540, 570, 600,
+        630, 660, 690, 720,
+
+
+        +40, +80, 120, 160,
+        200, 240, 280, 320,
+        360, 400, 440, 480,
+        520, 560, 600, 640,
+        680, 720, 760, 800,
+        840, 880, 920, 960,
+
+          50,  100,  150,  200,
+         250,  300,  350,  400,
+         450,  500,  550,  600,
+         650,  700,  750,  800,
+         850,  900,  950, 1000,
+        1050, 1100, 1150, 1200,
+
+          60,  120,  180,  240,
+         300,  360,  420,  480,
+         540,  600,  660,  720,
+         780,  840,  900,  960,
+        1020, 1080, 1140, 1200,
+        1260, 1320, 1380, 1440, 
+        };
+        // clang-format on
+
+        TRes res = outer_product(tensor1, tensor2);
+        BOOST_CHECK_EQUAL_COLLECTIONS(
+            std::begin(res), std::end(res), std::begin(values), std::end(values)
+        );
+    }
+}
+
 BOOST_AUTO_TEST_CASE_TEMPLATE(contraction_matrix, Scalar, scalar_types)
 {
     constexpr gttl::Dimensions<2> dims{3_D, 3_D};
