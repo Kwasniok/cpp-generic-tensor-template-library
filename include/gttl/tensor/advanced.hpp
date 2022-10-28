@@ -121,6 +121,77 @@ contraction(const Tensor<Scalar, RANK, DIMENSIONS, Traits>& x) requires(
     return res;
 }
 
+/*
+ * @brief two-tensor conctraction
+ * @note Same as contraction of an outer product but more resource efficient.
+ */
+template <
+    std::size_t i,
+    std::size_t j,
+    typename Scalar,
+    std::size_t RANK1,
+    std::size_t RANK2,
+    Dimensions<RANK1> DIMENSIONS1,
+    Dimensions<RANK2> DIMENSIONS2>
+[[nodiscard]] constexpr auto
+// clang-format off
+contraction(const Tensor<Scalar, RANK1, DIMENSIONS1>& x,
+    const Tensor<Scalar, RANK2, DIMENSIONS2>& y)
+    // clang-format on
+    requires(
+        (i != j) && (RANK1 + RANK2 >= 2) && (i < (RANK1 + RANK2)) &&
+        (j < (RANK1 + RANK2)) &&
+        (cexpr::array::concatenate(DIMENSIONS1, DIMENSIONS2)[i] ==
+         cexpr::array::concatenate(DIMENSIONS1, DIMENSIONS2)[j])
+    )
+{
+    // there are 4 cases:
+    //     i,j both in x
+    //     i,j both in y
+    //     i in y and j in x
+    //     i in x and j in y  <- only 'new' case
+
+    if constexpr (i < RANK1 && j < RANK1) {
+        return outer_product(contraction<i, j>(x), y);
+    } else if constexpr (i >= RANK1 && j >= RANK1) {
+        return outer_product(x, contraction<i - RANK1, j - RANK1>(y));
+    } else if constexpr (i > j) {
+        return contraction<j, i>(x, y);
+    } else {
+        // from above: i must be in x and j in y
+        using Tensor1 = Tensor<Scalar, RANK1, DIMENSIONS1>;
+        using Tensor2 = Tensor<Scalar, RANK2, DIMENSIONS2>;
+        using ResTensor = Tensor<
+            Scalar,
+            RANK1 + RANK2 - 2,
+            cexpr::array::multi_erase_at<2, std::array<std::size_t, 2>{i, j}>(
+                cexpr::array::concatenate(DIMENSIONS1, DIMENSIONS2)
+            )>;
+
+        // note: Iterating primarily over the memory index is more
+        //       compiler-firendly
+        // loop over all elements in x
+        //     loop over all elements in y
+        //         if both elements contribute to a product in the result
+        //             add product of both elements to element in result
+        ResTensor res{}; // zero-initialization required!
+        for (std::size_t a{0}; a < Tensor1::size; ++a) {
+            const auto mi1 = Tensor1::get_multi_index_for_index(a);
+            for (std::size_t b{0}; b < Tensor2::size; ++b) {
+                const auto mi2 = Tensor2::get_multi_index_for_index(b);
+                if (mi1.template get<i>() == mi2.template get<j - RANK1>()) {
+                    const auto mi_both = mi1.concatenate(mi2);
+                    const auto mi_res = mi_both.template multi_erase_at<
+                        2,
+                        std::array<std::size_t, 2>{i, j}>();
+                    res.at(mi_res) += x.at(mi1) * y.at(mi2);
+                }
+            }
+        }
+        return res;
+    }
+}
+
 } // namespace gttl
 
 #endif

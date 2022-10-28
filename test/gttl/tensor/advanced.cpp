@@ -256,3 +256,155 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(contraction_ten5, Scalar, scalar_types)
         std::begin(res), std::end(res), std::begin(values), std::end(values)
     );
 }
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(contraction_matrix_scalar, Scalar, scalar_types)
+{
+    constexpr gttl::Dimensions<2> dims1{3_D, 3_D};
+    constexpr gttl::Dimensions<0> dims2{};
+    constexpr gttl::Dimensions<0> dims_res{};
+    using T1 = gttl::Tensor<Scalar, 2, dims1>;
+    using T2 = gttl::Tensor<Scalar, 0, dims2>;
+    using TRes = gttl::Tensor<Scalar, 0, dims_res>;
+    // clang-format off
+    const T1 tensor1{
+        1, 2, 3,
+        4, 5, 6,
+        7, 8, 9,
+    };
+    // clang-format on
+    const T2 tensor2{10};
+    std::array<Scalar, 1> values{10 + 50 + 90};
+
+    {
+        // matrix left
+        TRes res = contraction<0, 1>(tensor1, tensor2);
+        BOOST_CHECK_EQUAL_COLLECTIONS(
+            std::begin(res), std::end(res), std::begin(values), std::end(values)
+        );
+    }
+    {
+        // matrix right
+        TRes res = contraction<1, 0>(tensor2, tensor1);
+        BOOST_CHECK_EQUAL_COLLECTIONS(
+            std::begin(res), std::end(res), std::begin(values), std::end(values)
+        );
+    }
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(contraction_matrix_vector, Scalar, scalar_types)
+{
+    constexpr gttl::Dimensions<2> dims1{3_D, 2_D};
+    constexpr gttl::Dimensions<1> dims2{3_D};
+    constexpr gttl::Dimensions<1> dims_res{2_D};
+    using T1 = gttl::Tensor<Scalar, 2, dims1>;
+    using T2 = gttl::Tensor<Scalar, 1, dims2>;
+    using TRes = gttl::Tensor<Scalar, 1, dims_res>;
+    // clang-format off
+    const T1 tensor1{
+        1, 2,
+        3, 4,
+        5, 6,
+    };
+    // clang-format on
+    const T2 tensor2{10, 20, 30};
+    std::array<Scalar, 2> values{10 + 60 + 150, 20 + 80 + 180};
+
+    {
+        // matrix left, vector right
+        TRes res;
+        res = contraction<0, 2>(tensor1, tensor2);
+        BOOST_CHECK_EQUAL_COLLECTIONS(
+            std::begin(res), std::end(res), std::begin(values), std::end(values)
+        );
+        res = contraction<2, 0>(tensor1, tensor2);
+        BOOST_CHECK_EQUAL_COLLECTIONS(
+            std::begin(res), std::end(res), std::begin(values), std::end(values)
+        );
+    }
+    {
+        // vector left, matrix right
+        TRes res;
+        res = contraction<0, 1>(tensor2, tensor1);
+        BOOST_CHECK_EQUAL_COLLECTIONS(
+            std::begin(res), std::end(res), std::begin(values), std::end(values)
+        );
+        res = contraction<1, 0>(tensor2, tensor1);
+        BOOST_CHECK_EQUAL_COLLECTIONS(
+            std::begin(res), std::end(res), std::begin(values), std::end(values)
+        );
+    }
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(contraction_matrix_ten3, Scalar, scalar_types)
+{
+    constexpr gttl::Dimensions<2> dims1{3_D, 2_D};
+    constexpr gttl::Dimensions<3> dims2{2_D, 3_D, 4_D};
+    using T1 = gttl::Tensor<Scalar, 2, dims1>;
+    using T2 = gttl::Tensor<Scalar, 3, dims2>;
+    // clang-format off
+    const T1 tensor1{
+        1, 2,
+        3, 4,
+        5, 6,
+    };
+    const T2 tensor2{
+         10,  20,  30,  40,
+         50,  60,  70,  80,
+         90, 100, 110, 120,
+
+        130, 140, 150, 160,
+        170, 180, 190, 200,
+        210, 220, 230, 240,
+    };
+    // clang-format on
+
+    {
+        // matrix left, rank-3 tensor right
+        constexpr gttl::Dimensions<3> dims_res{2_D, 2_D, 4_D};
+        using TRes = gttl::Tensor<Scalar, 3, dims_res>;
+        // clang-format off
+        std::array<Scalar, 2 * 2 * 4> values{
+             610,  700,  790,  880,
+            1690, 1780, 1870, 1960,
+             760,  880, 1000, 1120,
+            2200, 2320, 2440, 2560,
+        };
+        // clang-format on
+        TRes res;
+        res = contraction<0, 3>(tensor1, tensor2);
+        BOOST_CHECK_EQUAL_COLLECTIONS(
+            std::begin(res), std::end(res), std::begin(values), std::end(values)
+        );
+        res = contraction<3, 0>(tensor1, tensor2);
+        BOOST_CHECK_EQUAL_COLLECTIONS(
+            std::begin(res), std::end(res), std::begin(values), std::end(values)
+        );
+    }
+    {
+        // rank-3 tensor left, matrix right
+        constexpr gttl::Dimensions<3> dims_res{2_D, 4_D, 2_D};
+        using TRes = gttl::Tensor<Scalar, 3, dims_res>;
+        // clang-format off
+        std::array<Scalar, 2 * 4 * 2> values{
+             610,  760,
+             700,  880,
+             790, 1000,
+             880, 1120,
+
+             1690, 2200,
+             1780, 2320,
+             1870, 2440,
+             1960, 2560,
+        };
+        // clang-format on
+        TRes res;
+        res = contraction<1, 3>(tensor2, tensor1);
+        BOOST_CHECK_EQUAL_COLLECTIONS(
+            std::begin(res), std::end(res), std::begin(values), std::end(values)
+        );
+        res = contraction<1, 3>(tensor2, tensor1);
+        BOOST_CHECK_EQUAL_COLLECTIONS(
+            std::begin(res), std::end(res), std::begin(values), std::end(values)
+        );
+    }
+}
