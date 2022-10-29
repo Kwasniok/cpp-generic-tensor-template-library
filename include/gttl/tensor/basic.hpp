@@ -278,7 +278,7 @@ requires(
     }
 
     [[nodiscard]] constexpr const auto&
-    operator[](const decltype(DIMENSIONS[0]) i_first) const requires(RANK > 0)
+    operator[](const std::size_t i_first) const requires(RANK > 0)
     {
         using SubTensor =
             Tensor<Scalar, RANK - 1, cexpr::array::rest(DIMENSIONS)>;
@@ -309,7 +309,7 @@ requires(
     }
 
     [[nodiscard]] constexpr auto&
-    operator[](const decltype(DIMENSIONS[0]) i_first) requires(RANK > 0)
+    operator[](const std::size_t i_first) requires(RANK > 0)
     {
         using SubTensor =
             Tensor<Scalar, RANK - 1, cexpr::array::rest(DIMENSIONS)>;
