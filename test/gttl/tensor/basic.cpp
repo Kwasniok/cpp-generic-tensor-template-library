@@ -588,7 +588,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(
     using A = const std::array<Scalar, 6>&;
     for (std::size_t i{0}; i < 4; ++i) {
         // note: compare as arrays for proper floating-point comparison
-        BOOST_TEST(A(tensor.at(i)) == A(values[i]));
+        BOOST_TEST(A(tensor.at(i)) == A(values.at(i)));
     }
 }
 
@@ -608,9 +608,9 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(mut_matrix_at_indicies_ten3, Scalar, scalar_types)
 
     using A = const std::array<Scalar, 6>&;
     for (std::size_t i{0}; i < 4; ++i) {
-        tensor.at(i) = values[i];
+        tensor.at(i) = values.at(i);
         // note: compare as arrays for proper floating-point comparison
-        BOOST_TEST(A(tensor.at(i)) == A(values[i]));
+        BOOST_TEST(A(tensor.at(i)) == A(values.at(i)));
     }
 }
 
@@ -636,7 +636,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(const_matrix_slice_ten3, Scalar, scalar_types)
     using A = const std::array<Scalar, 6>&;
     for (std::size_t i{0}; i < 4; ++i) {
         // note: compare as arrays for proper floating-point comparison
-        BOOST_TEST(A(tensor[i]) == A(values[i]));
+        BOOST_TEST(A(tensor.at(i)) == A(values.at(i)));
     }
 }
 
@@ -656,9 +656,9 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(mut_matrix_slice_ten3, Scalar, scalar_types)
 
     using A = const std::array<Scalar, 6>&;
     for (std::size_t i{0}; i < 4; ++i) {
-        tensor[i] = values[i];
+        tensor.at(i) = values.at(i);
         // note: compare as arrays for proper floating-point comparison
-        BOOST_TEST(A(tensor[i]) == A(values[i]));
+        BOOST_TEST(A(tensor.at(i)) == A(values.at(i)));
     }
 }
 
@@ -679,7 +679,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(
 
     std::size_t i{0};
     for (const auto& mi : T::make_index_range()) {
-        BOOST_TEST(tensor.at(mi) == values[i]);
+        BOOST_TEST(tensor.at(mi) == values.at(i));
         ++i;
     }
 }
@@ -698,8 +698,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(
 
     std::size_t i{0};
     for (auto& mi : T::make_index_range()) {
-        tensor.at(mi) = values[i];
-        BOOST_TEST(tensor.at(mi) == values[i]);
+        tensor.at(mi) = values.at(i);
+        BOOST_TEST(tensor.at(mi) == values.at(i));
         ++i;
     }
 }
@@ -728,7 +728,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(
     std::size_t i{0};
     for (const auto& mi : Range{}) {
         // note: compare as arrays for proper floating-point comparison
-        BOOST_TEST(A(tensor.at(mi)) == A(values[i]));
+        BOOST_TEST(A(tensor.at(mi)) == A(values.at(i)));
         ++i;
     }
 }
@@ -753,9 +753,9 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(
     using A = const std::array<Scalar, 6>&;
     std::size_t i{0};
     for (const auto& mi : Range{}) {
-        tensor.at(mi) = values[i];
+        tensor.at(mi) = values.at(i);
         // note: compare as arrays for proper floating-point comparison
-        BOOST_TEST(A(tensor.at(mi)) == A(values[i]));
+        BOOST_TEST(A(tensor.at(mi)) == A(values.at(i)));
         ++i;
     }
 }
