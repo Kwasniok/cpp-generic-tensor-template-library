@@ -21,7 +21,7 @@ constexpr auto add = [](const auto& x, const auto& y) constexpr
 };
 
 // There will be a lot of 'magic' numbers here.
-// NOLINTBEGIN(cppcoreguidelines-avoid-magic_numbers)
+// NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(default_constructor_scalar, Scalar, scalar_types)
 {
@@ -1220,4 +1220,4 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(multiplies_vector_scalar, Scalar, scalar_types)
     );
 }
 
-// NOLINTEND(cppcoreguidelines-avoid-magic_numbers)
+// NOLINTEND(cppcoreguidelines-avoid-magic-numbers)
