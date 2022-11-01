@@ -82,7 +82,7 @@ rectangleWithErrorBar[ {{x0_, x1_}, {y0_, y1_}}, value_, meta_] := Block[
 		{
 			ChartElementData["Rectangle"][{{x0, x1}, {y0, y1}}, value, meta],
 			{
-				Black,
+				Gray,
 				Line[
 					{
 						{
@@ -145,7 +145,7 @@ Export["test.png", %];
 
 
 (* ::Subtitle:: *)
-(*Benchmark Plot Functions*)
+(*Benchmark Figures Functions*)
 
 
 makePlotForBenchmark[databasePath_, benchmarkName_, title_, targetUnit_] := Block[
@@ -171,21 +171,30 @@ makePlotForBenchmark[databasePath_, benchmarkName_, title_, targetUnit_] := Bloc
 
 
 (* for convenience *)
-makeAndExportStandardPlotForBenchmark[benchmarkName_] := Block[
+makeAndExportStandardPlotForBenchmark[benchmarkPath_, benchmarkName_, benchmarkTitle_] := Block[
 	{fig},
-	fig = makePlotForBenchmark["results/" <> benchmarkName <> ".json", benchmarkName, mono[benchmarkName], Quantity["ns"]];
-	Export["figures/" <>benchmarkName <> ".png", fig];
+	fig = makePlotForBenchmark["results/" <> benchmarkPath <> ".json", benchmarkName, mono[benchmarkTitle], Quantity["ns"]];
+	Export["figures/" <> benchmarkPath <> ".png", fig];
 	fig
 ]
 
 
 (* ::Title:: *)
-(*Plots*)
+(*Make Figure*)
 
 
 (* ::Text:: *)
-(*For the benchmark `benchmark_xyz` call:*)
-(*makeAndExportStandardPlotForBenchmark["benchmark_xyz"]*)
-
-
-makeAndExportStandardPlotForBenchmark["benchmark_mat3_contract"]
+(*To make a figure for a benchmark call:*)
+(**)
+(*makeAndExportStandardPlotForBenchmark["path/to/benchmark_xyz", "benchmark_xyz", "title"]*)
+(**)
+(*where*)
+(**)
+(*"path/to/benchmark_xyz" results in *)
+(*	"benchmark/results/path/to/benchmark_xyz.json"*)
+(*	"benchmark/figures/path/to/benchmark_xyz.png"*)
+(*	*)
+(*"benchmark_xyz" is the name of the benchmark*)
+(**)
+(*"title" is the plot title*)
+(**)
