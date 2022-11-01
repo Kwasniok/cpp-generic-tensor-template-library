@@ -1,0 +1,86 @@
+#!/usr/bin/bash
+
+# runs a benchmark grid defined by configuration below and outputs it in JSON format
+
+# IMPORTANT: Must be run from project root directory!
+# IMPORTANT: Save results in 'bechmarks/results/benchmark_${NAME}.json'!
+
+set -e
+
+SRC_STEM="benchmarks/benchmark"
+BIN_DIR="build/benchmarks"
+
+# benchmark options
+# benchmark filename is: "${SRC_STEM}_${NAME}_${FRAMEWORK}.cpp"
+NAMES="" # "name1 name2" # no 'benchmark_' prefix
+FRAMEWORKS="gttl" # "gttl"
+COMPILERS="g++ clang++" # "g++ clang++"
+OMPTIMIZATION_FLAGS="-O2 -O3" #"-O0 -O1 -O2 -O3 -Ofast"
+REPITITIONS="1000000000" # depends on benchmark
+WARM_UP_REPITITIONS="100000" # depends on benchmark
+MEASUREMENTS="10" # 10 or higher
+
+# IMPORTANT: ALL warings are disabled!
+GENERAL_FLAGS="-std=c++20 -Wall -Wextra -Wpedantic -I include"
+
+mkdir -p ${BIN_DIR}
+
+printf "{\n"
+printf "    \"runs\": ["
+FIRST_RUN=1
+for NAME in ${NAMES}
+do
+    for FRAMEWORK in ${FRAMEWORKS}
+    do
+        for COMP in ${COMPILERS}
+        do
+            for OPT_FLAG in ${OMPTIMIZATION_FLAGS}
+            do
+                if (( !${FIRST_RUN} ))
+                then
+                    printf ",\n"
+                else
+                    printf "\n"
+                fi
+                FIRST_RUN=0
+
+                SRC="${SRC_STEM}_${NAME}_${FRAMEWORK}.cpp"
+                OUT="${BIN_DIR}/${NAME}_${FRAMEWORK}_${COMP}${OPT_FLAG}"
+                BUILD_CMD="${COMP} ${OPT_FLAG} -o ${OUT} ${GENERAL_FLAGS} ${SRC}"
+
+                printf "        {\n"
+                printf "            \"name\": \"${NAME}\",\n"
+                printf "            \"compiler\": \"${COMP}\",\n"
+                printf "            \"optimization_flags\": \"${OPT_FLAG}\",\n"
+                printf "            \"general_flags\": \"${GENERAL_FLAGS}\",\n"
+                printf "            \"build_cmd\": \"${BUILD_CMD}\",\n"
+                printf "            \"framework\": \"${FRAMEWORK}\",\n"
+                printf "            \"repititions\": \"${REPITITIONS}\",\n"
+                printf "            \"warm_up_repititions\": \"${WARM_UP_REPITITIONS}\",\n"
+
+                rm -f "\"${OUT}\""
+                ${BUILD_CMD} > /dev/null
+            
+                printf "            \"total_times\": [\n"
+                printf "                "
+                for ((N=1; N<=${MEASUREMENTS}; N++))
+                do
+                    printf "\""
+                    ${OUT} ${REPITITIONS} ${WARM_UP_REPITITIONS}
+                    if ((N < ${MEASUREMENTS} ))
+                    then
+                        printf "\",\n                "
+                    else
+                        printf "\""
+                    fi
+                done
+                    printf "\n"
+                printf "            ]\n"
+                printf "        }"
+                FIRST_RUN=0
+            done
+        done
+    done
+done
+printf "\n    ]\n"
+printf "}\n"
