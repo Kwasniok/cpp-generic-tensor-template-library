@@ -106,15 +106,32 @@ rectangleWithErrorBar[ {{x0_, x1_}, {y0_, y1_}}, value_, meta_] := Block[
 
 
 
-barChart[title_, compilers_, frameworks_, times_, targetUnit_:Quantity["s"]] := BarChart[
-	times // Map[Map[barLabel[targetUnit]]] // MapThread[Labeled, {#, (angle @* mono) /@ compilers}]&,
-	ChartElementFunction->rectangleWithErrorBar,
-	PlotLabel->title,
-	ChartLegends->mono /@ frameworks,
-	GridLines->Automatic,
-	TargetUnits->{targetUnit},
-	AxesLabel->Automatic,
-	ImageSize->Medium
+nopLine[nopTime_] := Block[
+	{left, right},
+	left = Scaled[{0, 0}, {0.4, nopTime // QuantityMagnitude}];
+	right = Scaled[{1, 0}, {0.4, nopTime // QuantityMagnitude}];
+	{
+		GrayLevel[0, 0.75],
+		Dashed,
+		Line[{left,right}],
+		Text["nop", right, {1, 1}] (* anchor is at top right corner *)
+	}
+]
+
+barChart[title_, compilers_, frameworks_, times_, targetUnit_:Quantity["s"], nopTime_:None] := Block[
+	{epilog},
+	epilog = If[nopTime === None, {}, nopLine[nopTime]];
+	BarChart[
+		times // Map[Map[barLabel[targetUnit]]] // MapThread[Labeled, {#, (angle @* mono) /@ compilers}]&,
+		ChartElementFunction->rectangleWithErrorBar,
+		PlotLabel->title,
+		ChartLegends->mono /@ frameworks,
+		GridLines->Automatic,
+		TargetUnits->{targetUnit},
+		AxesLabel->Automatic,
+		ImageSize->Medium,
+		Epilog->epilog
+	]
 ]
 
 
@@ -148,7 +165,7 @@ Export["test.png", %];
 (*Benchmark Figures Functions*)
 
 
-makePlotForBenchmark[databasePath_, benchmarkName_, title_, targetUnit_] := Block[
+makePlotForBenchmark[databasePath_, benchmarkName_, title_, targetUnit_, nopTime_:None] := Block[
 	{runs, compilers, optimizationFlags, frameworks, names, benchmarks, totalTimes, repititions, cycleTimes, cycleStats, compilersWithFlags},
 	runs = readRuns[databasePath];
 	compilers = runs // getCompilers;
@@ -166,14 +183,14 @@ makePlotForBenchmark[databasePath_, benchmarkName_, title_, targetUnit_] := Bloc
 	cycleStats = cycleTimes // Map[Map[makeStatistic]];
 	
 	compilersWithFlags = Outer[StringJoin, compilers, optimizationFlags] // Flatten;
-	barChart[title, compilersWithFlags, frameworks, cycleStats // Transpose, targetUnit]
+	barChart[title, compilersWithFlags, frameworks, cycleStats // Transpose, targetUnit, nopTime]
 ]
 
 
 (* for convenience *)
-makeAndExportStandardPlotForBenchmark[benchmarkPath_, benchmarkName_, benchmarkTitle_] := Block[
+makeAndExportStandardPlotForBenchmark[benchmarkPath_, benchmarkName_, benchmarkTitle_, nopTime_:None] := Block[
 	{fig},
-	fig = makePlotForBenchmark["results/" <> benchmarkPath <> ".json", benchmarkName, mono[benchmarkTitle], Quantity["ns"]];
+	fig = makePlotForBenchmark["results/" <> benchmarkPath <> ".json", benchmarkName, mono[benchmarkTitle], Quantity["ns"], nopTime];
 	Export["figures/" <> benchmarkPath <> ".png", fig];
 	fig
 ]
