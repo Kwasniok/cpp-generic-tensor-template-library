@@ -163,7 +163,7 @@ makePlotForBenchmark[databasePath_, benchmarkName_, title_, targetUnit_] := Bloc
 	repititions = benchmarks // Map[Map[(#[["repititions"]] // interpretAsNumber)&]];
 	cycleTimes = MapThread[MapThread[Divide, {#1, #2}]&, {totalTimes, repititions}];
 	cycleTimes = cycleTimes // Map[Map[UnitConvert[#, targetUnit]&]];
-	cycleStats = cycleTimes // Map[Map[makeStatistic]] ;
+	cycleStats = cycleTimes // Map[Map[makeStatistic]];
 	
 	compilersWithFlags = Outer[StringJoin, compilers, optimizationFlags] // Flatten;
 	barChart[title, compilersWithFlags, frameworks, cycleStats // Transpose, targetUnit]
@@ -186,7 +186,7 @@ makeAndExportStandardPlotForBenchmark[benchmarkPath_, benchmarkName_, benchmarkT
 (* ::Text:: *)
 (*To make a figure for a benchmark call:*)
 (**)
-(*makeAndExportStandardPlotForBenchmark["path/to/benchmark_xyz", "benchmark_xyz", "title"]*)
+(*makeAndExportStandardPlotForBenchmark["path/to/benchmark_xyz", "xyz", "title"]*)
 (**)
 (*where*)
 (**)
@@ -194,7 +194,7 @@ makeAndExportStandardPlotForBenchmark[benchmarkPath_, benchmarkName_, benchmarkT
 (*	"benchmark/results/path/to/benchmark_xyz.json"*)
 (*	"benchmark/figures/path/to/benchmark_xyz.png"*)
 (*	*)
-(*"benchmark_xyz" is the name of the benchmark*)
+(*"xyz" is the name of the benchmark (suffix of the binary)*)
 (**)
 (*"title" is the plot title*)
 (**)
