@@ -156,7 +156,7 @@ makePlotForBenchmark[databasePath_, benchmarkName_, title_, targetUnit_] := Bloc
 	frameworks = runs // getFrameworks;
 	names = runs // getNames;
 	
-	benchmarks = runs // selectWithName["mat3_contract"];
+	benchmarks = runs // selectWithName[benchmarkName];
 	benchmarks = benchmarks // gatherByFramework[frameworks]// Map[Flatten @* gatherAsCompilerOptimizationFlagsMatrix[compilers, optimizationFlags]];
 	
 	totalTimes = benchmarks // Map[Map[(#[["total_times"]] // interpretAsQuantity)&]];
