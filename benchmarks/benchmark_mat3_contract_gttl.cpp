@@ -5,7 +5,12 @@
 
 using namespace gttl::literals; // for _D
 
-using Scalar = float;
+// using Scalar = float;
+// using Scalar = double;
+// using Scalar = long double;
+
+using Scalar = double;
+
 template <std::size_t N>
 using Dims = gttl::Dimensions<N>;
 using Tensor = gttl::Tensor<Scalar, 2, Dims<2>{3_D, 3_D}>;

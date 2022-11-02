@@ -2,7 +2,11 @@
 
 #include "benchmark.hpp"
 
-using Tensor = glm::mat3x3; // is matrix of floats
+// using Tensor = glm::mat3x3;  // is matrix of floats
+// using Tensor = glm::dmat3x3; // is matrix of doubles
+// using Tensor = glm::mat<3, 3, long double, glm::defaultp>;
+
+using Tensor = glm::dmat3x3;
 
 Tensor
 make()
