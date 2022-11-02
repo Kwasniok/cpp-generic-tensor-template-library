@@ -65,7 +65,7 @@ getValue[value_Rule] := value // Keys
 getValue[value_Quantity] := value
 
 mono[str_] := Style[str, FontFamily->"Bitstream Vera Sans Mono"]
-nicerValue[value_, targetUnit_] := N[UnitConvert[getValue[value] , targetUnit], 2]
+nicerValue[value_, targetUnit_] := N[UnitConvert[getValue[value] , targetUnit], 2] // DecimalForm
 
 barLabel[targetUnit_][valueOrRule_] := Labeled[valueOrRule, angle[nicerValue[getValue[valueOrRule], targetUnit]], Above]
 angle[x_] := Rotate[x, -((3\[Pi])/8)]
