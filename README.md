@@ -1,11 +1,22 @@
 # Generic Tensor Template Library
 
 ## Target
-- highly flexible and math-orientated tensor library
-  - **selectable field/scalar type** with traits
-  - **arbitrary rank** for tensors
-  - **arbitrary dimension** per rank
-- best possible efficiency given these constraints
+- highly flexible and math-orientated tensor (representation) library allowing:
+  - **arbitrary scalar types**
+  - **arbitrary scalar operations** (type traits)
+  - **arbitrary ranks** for tensors
+  - **arbitrary dimensions** per rank
+- with the goal to be as efficiency as possible under these constraints
+
+## Features
+- scalar type traits
+- customizable tensor shapes
+- scalar operations `+`, `-`, `*`, `/`
+- tensor operations `+`, `-`, `+=`, `-=`, `*`, `*=` (scalar multiplication), `outer_product`, `contract`
+- element and subtensor access
+- (in-place) elementwise operations of arbitrary arity
+- **static memory by default**: tensors are represented as (fixed-size) arrays of scalars
+- strongly typed: **compile-time checks for contractions** etc.
 
 ## Structure
 This is a header-only library. It is located inside the `include` folder.
