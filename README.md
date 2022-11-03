@@ -18,7 +18,7 @@
 - **static memory by default**: tensors are represented as (fixed-size) arrays of scalars
 - strongly typed: **compile-time checks for contractions** etc.
 
-## Structure
+## Usage
 This is a header-only library. It is located inside the `include` folder.
 To import everything use
 ```
