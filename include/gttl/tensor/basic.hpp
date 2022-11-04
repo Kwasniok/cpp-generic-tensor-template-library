@@ -531,6 +531,19 @@ requires(
     }
 };
 
+template <
+    typename Scalar,
+    std::size_t RANK,
+    Dimensions<RANK> DIMENSIONS,
+    typename Traits>
+constexpr Tensor<Scalar, RANK, DIMENSIONS, Traits>
+operator*(
+    const Scalar& lhs, const Tensor<Scalar, RANK, DIMENSIONS, Traits>& rhs
+)
+{
+    return rhs * lhs;
+}
+
 static_assert(
     std::is_standard_layout_v<Tensor<float, 0, Dimensions<0>{}>>,
     "Tensor must be of standard layout."
