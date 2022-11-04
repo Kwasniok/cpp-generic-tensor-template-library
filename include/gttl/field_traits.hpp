@@ -13,6 +13,19 @@
 namespace gttl
 {
 
+/*
+ * @brief functional absulute value
+ * @note Defaults to std::abs.
+ */
+template <class T>
+struct abs {
+    constexpr auto
+    operator()(const T& x) const
+    {
+        return std::abs(x);
+    }
+};
+
 /**
  * @brief traits for field type
  * @note The axioms and semantics are NOT checked!
@@ -26,6 +39,7 @@ struct field_traits {
     using neg = std::negate<T>;
     constexpr static T zero = static_cast<T>(0);
     constexpr static T one = static_cast<T>(1);
+    using abs = gttl::abs<T>;
 };
 
 } // namespace gttl

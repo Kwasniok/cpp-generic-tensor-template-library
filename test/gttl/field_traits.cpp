@@ -69,3 +69,14 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_one, Scalar, scalar_types)
     using Traits = gttl::field_traits<Scalar>;
     BOOST_TEST(Traits::one == 1);
 }
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(test_abs, Scalar, scalar_types)
+{
+    using Traits = gttl::field_traits<Scalar>;
+    auto op = typename Traits::abs{};
+
+    BOOST_TEST(op(Scalar{+0}) == 0);
+    BOOST_TEST(op(Scalar{-0}) == 0);
+    BOOST_TEST(op(Scalar{+4}) == 4);
+    BOOST_TEST(op(Scalar{-4}) == 4);
+}
