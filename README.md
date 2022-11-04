@@ -21,12 +21,17 @@
 ## Usage
 This is a header-only library. It is located inside the `include` folder.
 To import everything use
-```
+```cpp
 #include <gttl.hpp>
 ```
 To import parts of the library use
+```cpp
+#include <gttl/path-to-part.hpp>
 ```
-#include <gttl/<path-to-part>.hpp>
+
+For support of `boost::numeric::odeint` import
+```cpp
+#include <gttl/extensions/boost/numeric/odeint.hpp>
 ```
 
 ## Documentation
