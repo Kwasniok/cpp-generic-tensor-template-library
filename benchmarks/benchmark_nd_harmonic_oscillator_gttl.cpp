@@ -5,7 +5,7 @@
 #include <boost/numeric/odeint/stepper/runge_kutta4.hpp>
 
 #include <gttl.hpp>
-#include <gttl/extensions/boost/numeric/odeint/tensor.hpp>
+#include <gttl/extensions/boost/numeric/odeint.hpp>
 
 #include "benchmark.hpp"
 
