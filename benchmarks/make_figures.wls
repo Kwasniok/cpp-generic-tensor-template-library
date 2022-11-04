@@ -188,9 +188,9 @@ makePlotForBenchmark[databasePath_, benchmarkName_, title_, targetUnit_, nopTime
 
 
 (* for convenience *)
-makeAndExportStandardPlotForBenchmark[benchmarkPath_, benchmarkName_, benchmarkTitle_, nopTime_:None] := Block[
+makeAndExportStandardPlotForBenchmark[benchmarkPath_, benchmarkName_, benchmarkTitle_, nopTime_:None, targetUnit_:Quantity["ns"]] := Block[
 	{fig},
-	fig = makePlotForBenchmark["results/" <> benchmarkPath <> ".json", benchmarkName, mono[benchmarkTitle], Quantity["ns"], nopTime];
+	fig = makePlotForBenchmark["results/" <> benchmarkPath <> ".json", benchmarkName, mono[benchmarkTitle], targetUnit, nopTime];
 	Export["figures/" <> benchmarkPath <> ".png", fig];
 	fig
 ]
