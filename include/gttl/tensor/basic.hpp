@@ -10,6 +10,7 @@
 #include <concepts>
 #include <iostream>
 #include <limits>
+#include <ranges>
 
 #include "../dimensions.hpp"
 #include "../field_traits.hpp"
@@ -572,6 +573,18 @@ static_assert(
         Tensor<float, 2, Dimensions<2>{Dimension{3}, Dimension{3}}>>,
     "Tensor must be an aggregate type."
 );
+
+static_assert(std::ranges::contiguous_range<Tensor<float, 0, Dimensions<0>{}>>);
+static_assert(std::ranges::contiguous_range<
+              Tensor<float, 1, Dimensions<1>{Dimension{3}}>>);
+static_assert(std::ranges::contiguous_range<
+              Tensor<float, 2, Dimensions<2>{Dimension{3}, Dimension{3}}>>);
+
+static_assert(std::ranges::viewable_range<Tensor<float, 0, Dimensions<0>{}>>);
+static_assert(std::ranges::viewable_range<
+              Tensor<float, 1, Dimensions<1>{Dimension{3}}>>);
+static_assert(std::ranges::viewable_range<
+              Tensor<float, 2, Dimensions<2>{Dimension{3}, Dimension{3}}>>);
 
 template <
     typename Scalar,
