@@ -1,11 +1,13 @@
 // clang-format off
 #include <iostream>
 
-#include <boost/numeric/odeint/integrate/integrate_const.hpp>
-#include <boost/numeric/odeint/stepper/runge_kutta4.hpp>
+#include <gttl/extensions/boost/numeric/odeint.hpp>
+
+#include <boost/numeric/odeint/integrate/integrate_adaptive.hpp>
+#include <boost/numeric/odeint/stepper/generation/generation_runge_kutta_cash_karp54.hpp>
+#include <boost/numeric/odeint/stepper/generation/make_controlled.hpp>
 
 #include <gttl.hpp>
-#include <gttl/extensions/boost/numeric/odeint.hpp>
 
 using namespace gttl::literals; // for _D
 
@@ -41,14 +43,18 @@ int main()
     constexpr Scalar initial_dt = 0.01;
     constexpr Scalar t_start = 0.0;
     constexpr Scalar t_stop = 10.0;
+    constexpr Scalar error_abs = 1.0e-2;
+    constexpr Scalar error_rel = 1.0e-2;
 
     PhaseVec phase = {1, 1, 1, 0, 0, 0};
 
     cout << "phase(t=" << t_start << "):  ";
     cout << phase << '\n';
 
-    runge_kutta4<PhaseVec, Scalar> stepper;
-    auto steps = integrate_const(
+    auto stepper = make_controlled(
+        error_abs, error_rel, runge_kutta_cash_karp54<PhaseVec, Scalar>()
+    );
+    auto steps = integrate_adaptive(
         stepper, harmonic_oscillator, phase, t_start, t_stop, initial_dt
     );
 
