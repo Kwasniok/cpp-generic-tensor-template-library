@@ -50,7 +50,7 @@ struct vector_space_norm_inf<gttl::Tensor<Scalar, RANK, DIMENSIONS, Traits>> {
         // return max_element(transform(ten, typename Traits::abs{}));
 
         using Tensor = gttl::Tensor<Scalar, RANK, DIMENSIONS, Traits>;
-        using abs = typename Traits::abs;
+        const auto abs = typename Traits::abs{};
         result_type res{0};
         for (std::size_t i{0}; i < Tensor::size; ++i) {
             result_type elem{abs(ten[i])};
