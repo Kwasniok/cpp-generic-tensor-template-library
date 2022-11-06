@@ -41,11 +41,24 @@ template <
 
 struct vector_space_norm_inf<gttl::Tensor<Scalar, RANK, DIMENSIONS, Traits>> {
 
-    auto
+    using result_type = decltype(typename Traits::abs{}(Scalar{}));
+
+    result_type
     operator()(const gttl::Tensor<Scalar, RANK, DIMENSIONS, Traits>& ten) const
     {
-        using std::ranges::max_element, std::ranges::views::transform;
-        return max_element(transform(ten, Traits::abs));
+        // MAINTENANCE: modernize as:
+        // return max_element(transform(ten, typename Traits::abs{}));
+
+        using Tensor = gttl::Tensor<Scalar, RANK, DIMENSIONS, Traits>;
+        using abs = typename Traits::abs;
+        result_type res{0};
+        for (std::size_t i{0}; i < Tensor::size; ++i) {
+            result_type elem{abs(ten[i])};
+            if (elem > res) {
+                res = elem;
+            }
+        }
+        return res;
     }
 };
 
