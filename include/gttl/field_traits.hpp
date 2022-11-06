@@ -13,6 +13,9 @@
 namespace gttl
 {
 
+namespace functional
+
+{
 /*
  * @brief functional absulute value
  * @note Defaults to std::abs.
@@ -25,6 +28,8 @@ struct abs {
         return std::abs(x);
     }
 };
+
+} // namespace functional
 
 /**
  * @brief traits for field type
@@ -39,7 +44,7 @@ struct field_traits {
     using neg = std::negate<T>;
     constexpr static T zero = static_cast<T>(0);
     constexpr static T one = static_cast<T>(1);
-    using abs = gttl::abs<T>;
+    using abs = gttl::functional::abs<T>;
 };
 
 } // namespace gttl
