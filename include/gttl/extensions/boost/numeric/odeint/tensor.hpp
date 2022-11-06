@@ -66,4 +66,77 @@ struct vector_space_norm_inf<gttl::Tensor<Scalar, RANK, DIMENSIONS, Traits>> {
 } // namespace numeric
 } // namespace boost
 
+namespace gttl
+{
+
+/**
+ * @brief elementwise scalar addition for gttl::Tensor
+ * @note This is an undocumented requirement of boost::numeric::odeint.
+ */
+template <
+    typename Scalar,
+    std::size_t RANK,
+    gttl::Dimensions<RANK> DIMENSIONS,
+    typename Traits>
+
+constexpr gttl::Tensor<Scalar, RANK, DIMENSIONS, Traits>
+operator+(
+    const gttl::Tensor<Scalar, RANK, DIMENSIONS, Traits>& lhs, const Scalar& rhs
+)
+{
+    const auto func = [y = rhs, add = typename Traits::add{}](const Scalar& x) {
+        return add(x, y);
+    };
+    return lhs.elementwise(func);
+}
+
+/**
+ * @brief elementwise scalar addition for gttl::Tensor
+ * @note This is an undocumented requirement of boost::numeric::odeint.
+ */
+template <
+    typename Scalar,
+    std::size_t RANK,
+    gttl::Dimensions<RANK> DIMENSIONS,
+    typename Traits>
+
+constexpr gttl::Tensor<Scalar, RANK, DIMENSIONS, Traits>
+operator+(
+    const Scalar& lhs, const gttl::Tensor<Scalar, RANK, DIMENSIONS, Traits>& rhs
+)
+{
+    return rhs + lhs;
+}
+
+/** @brief elementwise division for gttl::Tensor */
+template <
+    typename Scalar,
+    std::size_t RANK,
+    gttl::Dimensions<RANK> DIMENSIONS,
+    typename Traits>
+
+constexpr gttl::Tensor<Scalar, RANK, DIMENSIONS, Traits>
+operator/(
+    const gttl::Tensor<Scalar, RANK, DIMENSIONS, Traits>& lhs,
+    const gttl::Tensor<Scalar, RANK, DIMENSIONS, Traits>& rhs
+)
+{
+    return lhs.elementwise(typename Traits::div{}, rhs);
+}
+
+/** @brief elementwise absolute value for gttl::Tensor */
+template <
+    typename Scalar,
+    std::size_t RANK,
+    gttl::Dimensions<RANK> DIMENSIONS,
+    typename Traits>
+
+constexpr gttl::Tensor<Scalar, RANK, DIMENSIONS, Traits>
+abs(const gttl::Tensor<Scalar, RANK, DIMENSIONS, Traits>& x)
+{
+    return x.elementwise(typename Traits::abs{});
+}
+
+} // namespace gttl
+
 #endif
