@@ -38,6 +38,7 @@ requires(
     using scalar_type = Scalar;
     constexpr static std::size_t rank{RANK};
     constexpr static Dimensions<RANK> dimensions{DIMENSIONS};
+    using traits_type = Traits;
 
     using multi_index_type = MultiIndex<RANK, DIMENSIONS>;
     using multi_index_range_type = MultiIndexRange<RANK, DIMENSIONS>;
