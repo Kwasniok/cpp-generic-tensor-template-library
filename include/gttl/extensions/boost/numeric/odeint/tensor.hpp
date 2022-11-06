@@ -53,7 +53,7 @@ struct vector_space_norm_inf<gttl::Tensor<Scalar, RANK, DIMENSIONS, Traits>> {
         const auto abs = typename Traits::abs{};
         result_type res{0};
         for (std::size_t i{0}; i < Tensor::size; ++i) {
-            result_type elem{abs(ten[i])};
+            result_type elem{abs(static_cast<Scalar>(ten[i]))};
             if (elem > res) {
                 res = elem;
             }
