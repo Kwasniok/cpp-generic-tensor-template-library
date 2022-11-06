@@ -8,6 +8,7 @@
 #include <boost/numeric/odeint/stepper/generation/make_controlled.hpp>
 
 #include <gttl.hpp>
+#include <gttl/extensions/boost/numeric/odeint.hpp>
 
 using namespace gttl::literals; // for _D
 
