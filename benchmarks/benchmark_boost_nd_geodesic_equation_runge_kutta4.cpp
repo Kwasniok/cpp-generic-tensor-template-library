@@ -2,7 +2,6 @@
 #include <numbers>
 #include <numeric>
 
-#include <boost/numeric/odeint/algebra/vector_space_algebra.hpp>
 #include <boost/numeric/odeint/integrate/integrate_const.hpp>
 #include <boost/numeric/odeint/stepper/runge_kutta4.hpp>
 
@@ -123,12 +122,19 @@ benchmark_body()
     using namespace boost::numeric::odeint;
     using std::numbers::pi;
 
+    constexpr Scalar initial_dt = 0.01;
+    constexpr Scalar t_start = 0.0;
+    constexpr Scalar t_stop = 10.0;
+
     // clang-format off
     phase = {
         1.0, pi / 4.0, pi / 2.0,
         0.0, 1.0,      1.0,
         };
-    // clang-format oon
+    // clang-format on
+
     runge_kutta4<PhaseVec, Scalar> stepper;
-    integrate_const(stepper, geodesic_equation, phase, 0.0, 10.0, 0.1);
+    integrate_const(
+        stepper, geodesic_equation, phase, t_start, t_stop, initial_dt
+    );
 }
