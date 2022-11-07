@@ -18,6 +18,19 @@
 - **static memory by default**: tensors are represented as (fixed-size) arrays of scalars
 - strongly typed: **compile-time checks for contractions** etc.
 
+## Non-Features
+These things are not implemented in this library:
+- reshaping tensors
+- change of index order (e.g. transposition)
+- dot, cross, length, trace or any other additional structure beyond the bare minimum
+- solving linear equations
+
+note: In the furture some of these might be provided as an extension. Forcing any specific interpretation of the tensors may contradict some of the use cases and is not desired.
+
+## Extenions
+The following items are supported via extensions of this library:
+- solving differential equations via 'boost::numeric::odeint`
+
 ## Usage
 This is a header-only library. It is located inside the `include` folder.
 To import everything use
@@ -47,6 +60,8 @@ To generate and execute all tests run
 make test
 ```
 (see [requirements])
+
+note: Some tests have additional requirements like `boost::numeric::odeint` and may need to be disabled manually.
 
 ## Basic Example
 ```cpp
