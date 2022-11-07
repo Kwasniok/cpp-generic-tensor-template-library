@@ -81,14 +81,21 @@ requires(
             size;
 
     // trivial conversion to array
-    operator const array_type&() const { return coefficients; }
+    constexpr operator const array_type&() const { return coefficients; }
 
     // rank zero tensor is trivialy convertible to scalar
-    operator Scalar() const requires(RANK == 0) { return coefficients[0]; }
+    constexpr operator Scalar() const requires(RANK == 0)
+    {
+        return coefficients[0];
+    }
 
-    operator Scalar&() requires(RANK == 0) { return coefficients[0]; }
+    constexpr
+    operator Scalar&() requires(RANK == 0)
+    {
+        return coefficients[0];
+    }
 
-    Tensor&
+    constexpr Tensor&
     operator=(const Scalar& value) requires(RANK == 0)
     {
         coefficients[0] = value;
