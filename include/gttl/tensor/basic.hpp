@@ -226,16 +226,18 @@ requires(
             "Tensor must be of standard layout."
         );
         static_assert(
-            sizeof(Tensor) == sizeof(Tensor::coefficients),
-            "`coefficients`must be only non-static data member of Tensor"
+            sizeof(Tensor) == sizeof(Scalar) * Tensor::size,
+            "`coefficients` must be only non-static data member of Tensor and "
+            "no padding is allowed."
         );
         static_assert(
             std::is_standard_layout_v<SubTensor>,
             "SubTensor must be of standard layout."
         );
         static_assert(
-            sizeof(SubTensor) == sizeof(SubTensor::coefficients),
-            "`coefficients`must be only non-static data member of SubTensor"
+            sizeof(SubTensor) == sizeof(Scalar) * SubTensor::size,
+            "`coefficients` must be only non-static data member of SubTensor "
+            "and no padding is allowed."
         );
         // reinterpret cast is checked above
         // NOLINTBEGIN(cppcoreguidelines-pro-type-reinterpret-cast)
@@ -263,16 +265,18 @@ requires(
             "Tensor must be of standard layout."
         );
         static_assert(
-            sizeof(Tensor) == sizeof(Tensor::coefficients),
-            "`coefficients`must be only non-static data member of Tensor"
+            sizeof(Tensor) == sizeof(Scalar) * Tensor::size,
+            "`coefficients` must be only non-static data member of Tensor and "
+            "no padding is allowed."
         );
         static_assert(
             std::is_standard_layout_v<SubTensor>,
             "SubTensor must be of standard layout."
         );
         static_assert(
-            sizeof(SubTensor) == sizeof(SubTensor::coefficients),
-            "`coefficients`must be only non-static data member of SubTensor"
+            sizeof(SubTensor) == sizeof(Scalar) * SubTensor::size,
+            "`coefficients` must be only non-static data member of SubTensor "
+            "and no padding is allowed."
         );
         // reinterpret cast is checked above
         // NOLINTBEGIN(cppcoreguidelines-pro-type-reinterpret-cast)
@@ -297,16 +301,18 @@ requires(
             "Tensor must be of standard layout."
         );
         static_assert(
-            sizeof(Tensor) == sizeof(Tensor::coefficients),
-            "`coefficients`must be only non-static data member of Tensor"
+            sizeof(Tensor) == sizeof(Scalar) * Tensor::size,
+            "`coefficients` must be only non-static data member of Tensor and "
+            "no padding is allowed."
         );
         static_assert(
             std::is_standard_layout_v<SubTensor>,
             "SubTensor must be of standard layout."
         );
         static_assert(
-            sizeof(SubTensor) == sizeof(SubTensor::coefficients),
-            "`coefficients`must be only non-static data member of SubTensor"
+            sizeof(SubTensor) == sizeof(Scalar) * SubTensor::size,
+            "`coefficients` must be only non-static data member of SubTensor "
+            "and no padding is allowed."
         );
         // reinterpret cast is checked above
         // NOLINTBEGIN(cppcoreguidelines-pro-type-reinterpret-cast)
@@ -328,16 +334,18 @@ requires(
             "Tensor must be of standard layout."
         );
         static_assert(
-            sizeof(Tensor) == sizeof(Tensor::coefficients),
-            "`coefficients`must be only non-static data member of Tensor"
+            sizeof(Tensor) == sizeof(Scalar) * Tensor::size,
+            "`coefficients` must be only non-static data member of Tensor and "
+            "no padding is allowed."
         );
         static_assert(
             std::is_standard_layout_v<SubTensor>,
             "SubTensor must be of standard layout."
         );
         static_assert(
-            sizeof(SubTensor) == sizeof(SubTensor::coefficients),
-            "`coefficients`must be only non-static data member of SubTensor"
+            sizeof(SubTensor) == sizeof(Scalar) * SubTensor::size,
+            "`coefficients` must be only non-static data member of SubTensor "
+            "and no padding is allowed."
         );
         // reinterpret cast is checked above
         // NOLINTBEGIN(cppcoreguidelines-pro-type-reinterpret-cast)

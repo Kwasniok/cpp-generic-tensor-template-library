@@ -1,5 +1,7 @@
 #define BOOST_TEST_MODULE gttl::Tensor
 
+#include <cstdint>
+
 #include "../../boost_util/array.hpp"
 #include <boost/mpl/list.hpp>
 #include <boost/test/included/unit_test.hpp>
@@ -1238,6 +1240,77 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(multiplies_scalar_vector, Scalar, scalar_types)
 
     BOOST_CHECK_EQUAL_COLLECTIONS(
         std::begin(res), std::end(res), std::begin(values), std::end(values)
+    );
+}
+
+// note: If the platform generates power of two sized memory layouts only,
+//       this will be power of two sized as well.
+//       This is fine, since there should be no padding issues.
+// note: This type attempts to provoke padding and alignment issues as much as
+//       possible.
+struct NonPowerOfTwoSizedScalar {
+    using value_type = std::int_least8_t; // as small as possible
+
+    value_type dummy1{-1};
+    value_type i{0};
+    value_type dummy2{-2};
+
+    NonPowerOfTwoSizedScalar() = default;
+
+    NonPowerOfTwoSizedScalar(const value_type value) : i{value} { }
+
+    bool
+    operator<=>(const NonPowerOfTwoSizedScalar&) const = default;
+};
+
+std::ostream&
+operator<<(std::ostream& os, const NonPowerOfTwoSizedScalar& rhs)
+{
+    os << static_cast<int>(rhs.i);
+    return os;
+}
+
+// MAINTENANCE:  C++23 provides fixed-width floating-point scalars in <stdfloat>
+//               Add these for improved test coverage.
+using layout_scalar_types = bmpl::list<
+    NonPowerOfTwoSizedScalar,
+    std::int_least8_t,
+    std::int_least16_t,
+    float,
+    double,
+    long double>;
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(layout, Scalar, layout_scalar_types)
+{
+    // note: There is a possibility that subtensors get an additional padding.
+    //       This test tries to detect any issues related to that in addition to
+    //       the static asserts provided in the include file.
+
+    // note: Use (sub)tensor sizes which are not powers of 2 to test for
+    //       paddinig.
+    constexpr gttl::Dimensions<2> dims{3_D, 3_D};
+    constexpr gttl::Dimensions<1> dims_sub{3_D};
+    using Tensor = gttl::Tensor<Scalar, 2, dims>;
+    using SubTensor = gttl::Tensor<Scalar, 1, dims_sub>;
+    Tensor tensor{};
+    SubTensor subtensor0{1, 2, 3};
+    SubTensor subtensor1{4, 5, 6};
+    SubTensor subtensor2{7, 8, 9};
+    std::array<Scalar, 9> values{1, 2, 3, 4, 5, 6, 7, 8, 9};
+
+    // Note: Must call operator[] to trigger static asserts!
+    // note: Unusual order is intended!
+    //       Writing to the middle section last may reveal padding issues.
+    //       E.g. if the subtensors have an additional padding at the end.
+    tensor[0] = subtensor0;
+    tensor[2] = subtensor2;
+    tensor[1] = subtensor1;
+
+    BOOST_CHECK_EQUAL_COLLECTIONS(
+        std::begin(tensor),
+        std::end(tensor),
+        std::begin(values),
+        std::end(values)
     );
 }
 
