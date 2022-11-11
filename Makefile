@@ -120,6 +120,9 @@ check_tidy:
 	-std=c++20 \
 	$(INCLUDES) \
 
+ifneq ("$(wildcard $(PLG)/playground.cpp)","")
+# playground.cpp exists
+
  ### PLAYGROUND ###
 .PHONY: playground
 playground: $(BLD)/playground
@@ -134,3 +137,5 @@ $(BLD)/playground: $(PLG)/playground.cpp $(BLD)/playground.d
 
 # import dependencies for binary
 include $(BLD)/playground.d
+
+endif
