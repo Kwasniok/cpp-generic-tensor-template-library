@@ -7,8 +7,11 @@
 #ifndef GTTL_TENSOR_BASIC_HPP
 #define GTTL_TENSOR_BASIC_HPP
 
+#include <algorithm>
 #include <concepts>
+#include <initializer_list>
 #include <iostream>
+#include <iterator>
 #include <limits>
 #include <ranges>
 
@@ -17,13 +20,15 @@
 #include "../multi_index.hpp"
 #include "../multi_index_range.hpp"
 
+// NOLINTBEGIN(cppcoreguidelines-pro-type-union-access)
 namespace gttl
 {
 
 /**
- * Tensor in standard representation as array of scalar values.
+ * @brief Tensor in standard representation as an array of scalar values
+ * (coefficients).
  * @note Is a standard layout struct.
- * @note Is an aggregate type.
+ * @note Mimics an aggregate type.
  */
 template <
     typename Scalar,
@@ -31,9 +36,7 @@ template <
     Dimensions<RANK> DIMENSIONS,
     typename Traits = field_traits<Scalar>>
 
-requires(
-    (RANK >= 0) && cexpr::array::all_strictly_positive(DIMENSIONS)
-) struct Tensor {
+requires(cexpr::array::all_strictly_positive(DIMENSIONS)) struct Tensor {
 
     using scalar_type = Scalar;
     constexpr static std::size_t rank{RANK};
@@ -44,6 +47,10 @@ requires(
     using multi_index_range_type = MultiIndexRange<RANK, DIMENSIONS>;
 
     constexpr static Dimension size{cexpr::array::prod(DIMENSIONS)};
+
+    using subtensor_type =
+        Tensor<Scalar, RANK - 1, cexpr::array::drop<1>(DIMENSIONS)>;
+
     // coefficient memory layout:
     //     let mi = {i_1, i_2, ..., i_n} be a multi-index
     //     A) Interpreting mi as a sequence of digits,
@@ -60,46 +67,80 @@ requires(
     //       +---+---+---+---+---+---+
     //     i   0   0   0   1   1   1
     //     j   0   1   2   0   1   2
-    using array_type = std::array<Scalar, size>;
-    array_type coefficients;
+    using coefficient_array_type = std::array<Scalar, size>;
 
-    // note: No further data members are allowed!
-    // note: Must be standard layout class!
-    //  i.e. std::is_standard_layout_v<Tensor>
-    //       && sizeof(Tensor) == sizeof(coefficients)
-    //       must be true
-    // note: Must be aggregate type!
-    //  i.e. std::is_aggregate_v<Tensor>
-    //       && sizeof(Tensor) == sizeof(coefficients)
-    //       must be true
+    using subtensor_array_type = std::array<subtensor_type, DIMENSIONS[0]>;
 
-    template <std::size_t REMOVED_RANKS>
-    requires(
-        RANK - REMOVED_RANKS >= 0
-    ) constexpr static std::size_t subtensor_size =
-        Tensor<Scalar, RANK - REMOVED_RANKS, drop<REMOVED_RANKS>(DIMENSIONS)>::
-            size;
+    static_assert(
+        std::is_standard_layout_v<subtensor_type>,
+        "`subtensor_type` must be of standard layout."
+    );
+    static_assert(
+        sizeof(subtensor_type) == sizeof(Scalar) * subtensor_type::size,
+        "No padding is allowed in `subtensor_type`."
+    );
+    static_assert(
+        sizeof(coefficient_array_type) == sizeof(subtensor_array_type),
+        "`coefficient_array_type` and `subtensor_type` must have matching "
+        "memory layout."
+    );
 
-    // trivial conversion to array
-    constexpr operator const array_type&() const { return coefficients; }
+    union {
+        coefficient_array_type coefficients;
+        subtensor_array_type subtensors;
+    };
 
-    // rank zero tensor is trivialy convertible to scalar
-    constexpr operator Scalar() const requires(RANK == 0)
+    /** @brief zero-initialize coefficients */
+    constexpr Tensor() { std::ranges::fill(coefficients, Traits::zero); }
+
+    /** @brief aggregate type-like initialization (from coefficients) */
+    constexpr Tensor(std::initializer_list<Scalar> coefficients)
     {
-        return coefficients[0];
+        std::ranges::copy(coefficients, std::begin(this->coefficients));
+        // fill rest with zeros
+        auto it = std::begin(this->coefficients);
+        std::advance(it, coefficients.size());
+        std::fill(it, std::end(this->coefficients), Traits::zero);
     }
 
-    constexpr
-    operator Scalar&() requires(RANK == 0)
+    /** @brief aggregate type-like initialization (from subtensors) */
+    constexpr Tensor(std::initializer_list<subtensor_type> subtensors)
     {
-        return coefficients[0];
+        std::ranges::copy(subtensors, std::begin(this->subtensors));
+        // fill rest with zeros
+        auto it = std::begin(this->subtensors);
+        std::advance(it, subtensors.size());
+        for (auto end = std::end(this->subtensors); it != end; ++it) {
+            *it = subtensor_type{};
+        }
+    }
+
+    constexpr Tensor(const Tensor& rhs) : coefficients{rhs.coefficients} { }
+
+    constexpr Tensor(Tensor&& rhs) : coefficients{std::move(rhs.coefficients)}
+    {
     }
 
     constexpr Tensor&
-    operator=(const Scalar& value) requires(RANK == 0)
+    operator=(const Tensor& rhs)
     {
-        coefficients[0] = value;
+        coefficients = rhs.coefficients;
         return *this;
+    }
+
+    constexpr Tensor&
+    operator=(Tensor&& rhs)
+    {
+        coefficients = std::move(rhs.coefficients);
+        return *this;
+    }
+
+    constexpr ~Tensor() { coefficients.~coefficient_array_type(); }
+
+    /** @brief trivially converts to a read-only array of coefficients */
+    constexpr operator const coefficient_array_type&() const
+    {
+        return coefficients;
     }
 
     constexpr auto
@@ -187,23 +228,11 @@ requires(
     constexpr static multi_index_type
     get_multi_index_for_index(std::size_t index)
     {
-        // MAINTENANCE: consider making this function private/protected
-        if constexpr (RANK == 0) {
-            return {};
-        } else {
-            using SubTensor =
-                Tensor<Scalar, RANK - 1, cexpr::array::rest(DIMENSIONS)>;
-            static_assert(
-                SubTensor::size < std::numeric_limits<Dimension>::max(),
-                "Type Dimension must be large enough to index all top level "
-                "elements."
-            );
-            const Dimension i_first =
-                static_cast<Dimension>(index / SubTensor::size);
-            const std::size_t i_rest{index % SubTensor::size};
-            // note: Implicit modulo operation for i_first in constructor.
-            return {i_first, SubTensor::get_multi_index_for_index(i_rest)};
-        }
+        const Dimension i_first =
+            static_cast<Dimension>(index / subtensor_type::size);
+        const std::size_t i_rest{index % subtensor_type::size};
+        // note: Implicit modulo operation for i_first in constructor.
+        return {i_first, subtensor_type::get_multi_index_for_index(i_rest)};
     }
 
     constexpr void
@@ -216,35 +245,8 @@ requires(
     // might throw: std::out_of_range
     template <typename... Ts>
     [[nodiscard]] constexpr const auto&
-    at(const std::size_t i_first, const Ts... i_rest) const requires(RANK > 0)
+    at(const std::size_t i_first, const Ts... i_rest) const
     {
-        using SubTensor =
-            Tensor<Scalar, RANK - 1, cexpr::array::rest(DIMENSIONS)>;
-        // note: Requires that coefficients are the only non-static data member.
-        static_assert(
-            std::is_standard_layout_v<Tensor>,
-            "Tensor must be of standard layout."
-        );
-        static_assert(
-            sizeof(Tensor) == sizeof(Scalar) * Tensor::size,
-            "`coefficients` must be only non-static data member of Tensor and "
-            "no padding is allowed."
-        );
-        static_assert(
-            std::is_standard_layout_v<SubTensor>,
-            "SubTensor must be of standard layout."
-        );
-        static_assert(
-            sizeof(SubTensor) == sizeof(Scalar) * SubTensor::size,
-            "`coefficients` must be only non-static data member of SubTensor "
-            "and no padding is allowed."
-        );
-        // reinterpret cast is checked above
-        // NOLINTBEGIN(cppcoreguidelines-pro-type-reinterpret-cast)
-        const std::array<SubTensor, DIMENSIONS[0]>& subtensors =
-            reinterpret_cast<const std::array<SubTensor, DIMENSIONS[0]>&>(*this
-            );
-        // NOLINTEND(cppcoreguidelines-pro-type-reinterpret-cast)
         if constexpr (sizeof...(Ts) == 0) {
             return subtensors.at(i_first);
         } else {
@@ -255,34 +257,8 @@ requires(
     // might throw: std::out_of_range
     template <typename... Ts>
     [[nodiscard]] constexpr auto&
-    at(const std::size_t i_first, const Ts... i_rest) requires(RANK > 0)
+    at(const std::size_t i_first, const Ts... i_rest)
     {
-        using SubTensor =
-            Tensor<Scalar, RANK - 1, cexpr::array::rest(DIMENSIONS)>;
-        // note: Requires that coefficients are the only non-static data member.
-        static_assert(
-            std::is_standard_layout_v<Tensor>,
-            "Tensor must be of standard layout."
-        );
-        static_assert(
-            sizeof(Tensor) == sizeof(Scalar) * Tensor::size,
-            "`coefficients` must be only non-static data member of Tensor and "
-            "no padding is allowed."
-        );
-        static_assert(
-            std::is_standard_layout_v<SubTensor>,
-            "SubTensor must be of standard layout."
-        );
-        static_assert(
-            sizeof(SubTensor) == sizeof(Scalar) * SubTensor::size,
-            "`coefficients` must be only non-static data member of SubTensor "
-            "and no padding is allowed."
-        );
-        // reinterpret cast is checked above
-        // NOLINTBEGIN(cppcoreguidelines-pro-type-reinterpret-cast)
-        std::array<SubTensor, DIMENSIONS[0]>& subtensors =
-            reinterpret_cast<std::array<SubTensor, DIMENSIONS[0]>&>(*this);
-        // NOLINTEND(cppcoreguidelines-pro-type-reinterpret-cast)
         if constexpr (sizeof...(Ts) == 0) {
             return subtensors.at(i_first);
         } else {
@@ -291,67 +267,14 @@ requires(
     }
 
     [[nodiscard]] constexpr const auto&
-    operator[](const std::size_t i_first) const requires(RANK > 0)
+    operator[](const std::size_t i_first) const
     {
-        using SubTensor =
-            Tensor<Scalar, RANK - 1, cexpr::array::rest(DIMENSIONS)>;
-        // note: Requires that coefficients are the only non-static data member.
-        static_assert(
-            std::is_standard_layout_v<Tensor>,
-            "Tensor must be of standard layout."
-        );
-        static_assert(
-            sizeof(Tensor) == sizeof(Scalar) * Tensor::size,
-            "`coefficients` must be only non-static data member of Tensor and "
-            "no padding is allowed."
-        );
-        static_assert(
-            std::is_standard_layout_v<SubTensor>,
-            "SubTensor must be of standard layout."
-        );
-        static_assert(
-            sizeof(SubTensor) == sizeof(Scalar) * SubTensor::size,
-            "`coefficients` must be only non-static data member of SubTensor "
-            "and no padding is allowed."
-        );
-        // reinterpret cast is checked above
-        // NOLINTBEGIN(cppcoreguidelines-pro-type-reinterpret-cast)
-        const std::array<SubTensor, DIMENSIONS[0]>& subtensors =
-            reinterpret_cast<const std::array<SubTensor, DIMENSIONS[0]>&>(*this
-            );
-        // NOLINTEND(cppcoreguidelines-pro-type-reinterpret-cast)
         return subtensors[i_first];
     }
 
     [[nodiscard]] constexpr auto&
     operator[](const std::size_t i_first) requires(RANK > 0)
     {
-        using SubTensor =
-            Tensor<Scalar, RANK - 1, cexpr::array::rest(DIMENSIONS)>;
-        // note: Requires that coefficients are the only non-static data member.
-        static_assert(
-            std::is_standard_layout_v<Tensor>,
-            "Tensor must be of standard layout."
-        );
-        static_assert(
-            sizeof(Tensor) == sizeof(Scalar) * Tensor::size,
-            "`coefficients` must be only non-static data member of Tensor and "
-            "no padding is allowed."
-        );
-        static_assert(
-            std::is_standard_layout_v<SubTensor>,
-            "SubTensor must be of standard layout."
-        );
-        static_assert(
-            sizeof(SubTensor) == sizeof(Scalar) * SubTensor::size,
-            "`coefficients` must be only non-static data member of SubTensor "
-            "and no padding is allowed."
-        );
-        // reinterpret cast is checked above
-        // NOLINTBEGIN(cppcoreguidelines-pro-type-reinterpret-cast)
-        std::array<SubTensor, DIMENSIONS[0]>& subtensors =
-            reinterpret_cast<std::array<SubTensor, DIMENSIONS[0]>&>(*this);
-        // NOLINTEND(cppcoreguidelines-pro-type-reinterpret-cast)
         return subtensors[i_first];
     }
 
@@ -360,7 +283,7 @@ requires(
     template <std::size_t index_rank, Dimensions<index_rank> index_dimensions>
     [[nodiscard]] constexpr const auto&
     at(const MultiIndex<index_rank, index_dimensions>& mi) const requires(
-        (RANK > 0) && (index_rank > 0) && (index_rank <= RANK) &&
+        (index_rank > 0) && (index_rank <= RANK) &&
         cexpr::array::is_prefix_of(index_dimensions, DIMENSIONS)
     )
     {
@@ -372,20 +295,13 @@ requires(
             // here
             return (*this)[mi.first()].at(mi.rest());
         }
-    }
-
-    // specialization for scalar
-    [[nodiscard]] constexpr auto
-    at(const MultiIndex<0, Dimensions<0>{}>&) const requires(RANK == 0)
-    {
-        return coefficients[0];
     }
 
     // might throw: std::out_of_range
     template <std::size_t index_rank, Dimensions<index_rank> index_dimensions>
     [[nodiscard]] constexpr auto&
     at(const MultiIndex<index_rank, index_dimensions>& mi) requires(
-        (RANK > 0) && (index_rank > 0) && (index_rank <= RANK) &&
+        (index_rank > 0) && (index_rank <= RANK) &&
         cexpr::array::is_prefix_of(index_dimensions, DIMENSIONS)
     )
     {
@@ -397,13 +313,6 @@ requires(
             // here
             return (*this)[mi.first()].at(mi.rest());
         }
-    }
-
-    // specialization for scalar
-    [[nodiscard]] constexpr auto&
-    at(const MultiIndex<0, Dimensions<0>{}>&) requires(RANK == 0)
-    {
-        return coefficients[0];
     }
 
     constexpr Tensor&
@@ -548,6 +457,299 @@ requires(
     }
 };
 
+// NOLINTEND(cppcoreguidelines-pro-type-union-access)
+
+/**
+ * @brief specialization for rank-zero tensor (a.k.a. scalar)
+ */
+template <typename Scalar, Dimensions<0> DIMENSIONS, typename Traits>
+
+requires(cexpr::array::all_strictly_positive(DIMENSIONS)
+) struct Tensor<Scalar, 0, DIMENSIONS, Traits> {
+
+    using scalar_type = Scalar;
+    constexpr static std::size_t rank{0};
+    constexpr static Dimensions<0> dimensions{DIMENSIONS};
+    using traits_type = Traits;
+
+    using multi_index_type = MultiIndex<0, DIMENSIONS>;
+    using multi_index_range_type = MultiIndexRange<0, DIMENSIONS>;
+
+    constexpr static Dimension size{1};
+    using coefficient_array_type = std::array<Scalar, size>;
+    coefficient_array_type coefficients;
+
+    /** @brief trivially converts to a read-only array of coefficients */
+    constexpr operator const coefficient_array_type&() const
+    {
+        return coefficients;
+    }
+
+    // rank zero tensor is trivialy convertible to scalar
+    constexpr operator Scalar() const { return coefficients[0]; }
+
+    // rank zero tensor is trivialy convertible to scalar
+    constexpr
+    operator Scalar&()
+    {
+        return coefficients[0];
+    }
+
+    // rank zero tensor is trivialy constructable from scalar
+    constexpr Tensor&
+    operator=(const Scalar& value)
+    {
+        coefficients[0] = value;
+        return *this;
+    }
+
+    constexpr auto
+    begin() noexcept
+    {
+        return std::begin(coefficients);
+    }
+
+    constexpr auto
+    begin() const noexcept
+    {
+        return std::cbegin(coefficients);
+    }
+
+    constexpr auto
+    cbegin() const noexcept
+    {
+        return std::cbegin(coefficients);
+    }
+
+    constexpr auto
+    end() noexcept
+    {
+        return std::end(coefficients);
+    }
+
+    constexpr auto
+    end() const noexcept
+    {
+        return std::cend(coefficients);
+    }
+
+    constexpr auto
+    cend() const noexcept
+    {
+        return std::cend(coefficients);
+    }
+
+    constexpr auto
+    rbegin() noexcept
+    {
+        return std::rbegin(coefficients);
+    }
+
+    constexpr auto
+    rbegin() const noexcept
+    {
+        return std::crbegin(coefficients);
+    }
+
+    constexpr auto
+    crbegin() const noexcept
+    {
+        return std::crbegin(coefficients);
+    }
+
+    constexpr auto
+    rend() noexcept
+    {
+        return std::rend(coefficients);
+    }
+
+    constexpr auto
+    rend() const noexcept
+    {
+        return std::crend(coefficients);
+    }
+
+    constexpr auto
+    crend() const noexcept
+    {
+        return std::crend(coefficients);
+    }
+
+    constexpr static multi_index_range_type
+    make_index_range()
+    {
+        return {};
+    }
+
+    /*
+     * @brief returns multi-index associated with the index-th coefficient
+     * @note It is asserted but NOT checked that 0 <= index < size.
+     */
+    constexpr static multi_index_type
+    get_multi_index_for_index(std::size_t)
+    {
+        return {};
+    }
+
+    constexpr void
+    swap(Tensor& other) noexcept(std::is_nothrow_swappable_v<Scalar>)
+    {
+        coefficients.swap(other.coefficients);
+    }
+
+    // specialization for scalar
+    [[nodiscard]] constexpr auto
+    at(const MultiIndex<0, Dimensions<0>{}>&) const
+    {
+        return coefficients[0];
+    }
+
+    // specialization for scalar
+    [[nodiscard]] constexpr auto&
+    at(const MultiIndex<0, Dimensions<0>{}>&)
+    {
+        return coefficients[0];
+    }
+
+    constexpr Tensor&
+    inplace_elementwise(auto op)
+    {
+        for (auto& c : coefficients) {
+            c = op(c);
+        }
+        return *this;
+    }
+
+    /*
+     * @brief in-place elementwise application of (n+1)-ary operation on
+     scalars
+     * @note `this` is the implicit first argument.
+     * @note `this` is the storage location.
+     */
+    template <
+        // all operands must be tensors of same type
+        std::same_as<Tensor>... Ts>
+
+    constexpr Tensor&
+    inplace_elementwise(auto op, const Ts&... xs) requires requires
+    {
+        // check if op is n-ary scalar operation
+        // clang-format off
+    { op(coefficients[0], xs.coefficients[0]...) } -> std::same_as<Scalar>;
+        // clang-format on
+    }
+
+    {
+        coefficients[0] = op(coefficients[0], xs.coefficients[0]...);
+        return *this;
+    }
+
+    /*
+     * @brief elementwise application of (n+1)-ary operation on scalars
+     * @note `this` is the implicit first argument.
+     * @note The return value is the storage location.
+     */
+    template <
+        // all operands must be tensors of same type
+        std::same_as<Tensor>... Ts>
+
+    constexpr Tensor
+    elementwise(auto op, const Ts&... xs) const requires requires
+    {
+        // check if op is n-ary scalar operation
+        // clang-format off
+    { op(coefficients[0], xs.coefficients[0]...) } -> std::same_as<Scalar>;
+        // clang-format on
+    }
+
+    {
+        Tensor res; // initialization is NOT required!
+        res.coefficients[0] = op(coefficients[0], xs.coefficients[0]...);
+        return res;
+    }
+
+    constexpr Tensor&
+    operator+=(const Tensor& rhs)
+    {
+        this->inplace_elementwise(typename Traits::add{}, rhs);
+        return *this;
+    }
+
+    constexpr Tensor&
+    operator-=(const Tensor& rhs)
+    {
+        this->inplace_elementwise(typename Traits::sub{}, rhs);
+        return *this;
+    }
+
+    // note: avoid *= due to confusion with other products
+    constexpr Tensor&
+    inplace_elem_mul(const Tensor& rhs)
+    {
+        this->inplace_elementwise(typename Traits::mul{}, rhs);
+        return *this;
+    }
+
+    // note: avoid /= since it is not common mathematical operation
+    constexpr Tensor&
+    inplace_elem_div(const Tensor& rhs)
+    {
+        this->inplace_elementwise(typename Traits::div{}, rhs);
+        return *this;
+    }
+
+    /**
+     * @brief in-place scalar multiplication
+     */
+    constexpr Tensor&
+    operator*=(const Scalar& rhs)
+    {
+        const auto f = [fac = rhs](const Scalar& x) { return x * fac; };
+        this->inplace_elementwise(f);
+        return *this;
+    }
+
+    constexpr Tensor
+    operator+(const Tensor& rhs) const
+    {
+        return this->elementwise(typename Traits::add{}, rhs);
+    }
+
+    constexpr Tensor
+    operator-(const Tensor& rhs) const
+    {
+        return this->elementwise(typename Traits::sub{}, rhs);
+    }
+
+    constexpr Tensor
+    elem_mul(const Tensor& rhs) const
+    {
+        return this->elementwise(typename Traits::mul{}, rhs);
+    }
+
+    constexpr Tensor
+    elem_div(const Tensor& rhs) const
+    {
+        return this->elementwise(typename Traits::div{}, rhs);
+    }
+
+    constexpr Tensor
+    operator-() const
+    {
+        return this->elementwise(typename Traits::neg{});
+    }
+
+    /**
+     * @brief scalar multiplication
+     */
+    constexpr Tensor
+    operator*(const Scalar& rhs) const
+    {
+        const auto f = [fac = rhs](const Scalar& x) { return x * fac; };
+        return this->elementwise(f);
+    }
+};
+
 template <
     typename Scalar,
     std::size_t RANK,
@@ -575,19 +777,9 @@ static_assert(
     "Tensor must be of standard layout."
 );
 static_assert(
-    std::is_aggregate_v<Tensor<float, 1, Dimensions<1>{Dimension{3}}>>,
-    "Tensor must be an aggregate type."
-);
-
-static_assert(
     std::is_standard_layout_v<
         Tensor<float, 2, Dimensions<2>{Dimension{3}, Dimension{3}}>>,
     "Tensor must be of standard layout."
-);
-static_assert(
-    std::is_aggregate_v<
-        Tensor<float, 2, Dimensions<2>{Dimension{3}, Dimension{3}}>>,
-    "Tensor must be an aggregate type."
 );
 
 static_assert(std::ranges::contiguous_range<Tensor<float, 0, Dimensions<0>{}>>);

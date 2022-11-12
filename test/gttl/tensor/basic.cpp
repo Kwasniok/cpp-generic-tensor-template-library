@@ -155,6 +155,55 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(
     );
 }
 
+BOOST_AUTO_TEST_CASE_TEMPLATE(subtensor_constructor_ten3, Scalar, scalar_types)
+{
+    constexpr gttl::Dimensions<3> dims{4_D, 3_D, 2_D};
+    constexpr gttl::Dimensions<2> subdims{3_D, 2_D};
+    using SubTensor = gttl::Tensor<Scalar, 2, subdims>;
+    gttl::Tensor<Scalar, 3, dims> tensor{
+        SubTensor{+1, +2, +3, +4, +5, +6},
+        SubTensor{+7, +8, +9, 10, 11, 12},
+        SubTensor{13, 14, 15, 16, 17, 18},
+        SubTensor{19, 20, 21, 22, 23, 24},
+    };
+    std::array<Scalar, 24> values{
+        +1, +2, +3, +4, +5, +6, +7, +8, +9, 10, 11, 12,
+        13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
+    };
+
+    BOOST_CHECK_EQUAL_COLLECTIONS(
+        std::begin(tensor),
+        std::end(tensor),
+        std::begin(values),
+        std::end(values)
+    );
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(
+    partial_subtensor_constructor_ten3, Scalar, scalar_types
+)
+{
+    constexpr gttl::Dimensions<3> dims{4_D, 3_D, 2_D};
+    constexpr gttl::Dimensions<2> subdims{3_D, 2_D};
+    using SubTensor = gttl::Tensor<Scalar, 2, subdims>;
+    gttl::Tensor<Scalar, 3, dims> tensor{
+        SubTensor{+1, +2, +3, +4, +5, +6}, SubTensor{+7, +8, +9, 10, 11, 12},
+        /*SubTensor{13, 14, 15, 16, 17, 18},
+        SubTensor{19, 20, 21, 22, 23, 24},*/
+    };
+    std::array<Scalar, 24> values{
+        +1, +2, +3, +4, +5, +6, +7, +8, +9, 10, 11, 12,
+        /*13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,*/
+    };
+
+    BOOST_CHECK_EQUAL_COLLECTIONS(
+        std::begin(tensor),
+        std::end(tensor),
+        std::begin(values),
+        std::end(values)
+    );
+}
+
 BOOST_AUTO_TEST_CASE_TEMPLATE(array_conversion_scalar, Scalar, scalar_types)
 {
     constexpr gttl::Dimensions<0> dims{};
@@ -1255,11 +1304,11 @@ struct NonPowerOfTwoSizedScalar {
     value_type i{0};
     value_type dummy2{-2};
 
-    NonPowerOfTwoSizedScalar() = default;
+    constexpr NonPowerOfTwoSizedScalar() = default;
 
-    NonPowerOfTwoSizedScalar(const value_type value) : i{value} { }
+    constexpr NonPowerOfTwoSizedScalar(const value_type value) : i{value} { }
 
-    bool
+    constexpr bool
     operator<=>(const NonPowerOfTwoSizedScalar&) const = default;
 };
 
@@ -1305,6 +1354,32 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(layout, Scalar, layout_scalar_types)
     tensor[0] = subtensor0;
     tensor[2] = subtensor2;
     tensor[1] = subtensor1;
+
+    BOOST_CHECK_EQUAL_COLLECTIONS(
+        std::begin(tensor),
+        std::end(tensor),
+        std::begin(values),
+        std::end(values)
+    );
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(punning_related, Scalar, layout_scalar_types)
+{
+    // note: An older version of Tensor caused a bug due o the strict aliasing
+    //       violation when using `reinterpret_cast`. This test chack the
+    //       specific scenario the bug was caused in.
+    // note: The bug was observerd on ARM64 but not x86 platforms using gcc and
+    //       clang.
+    constexpr gttl::Dimensions<2> dims{3_D, 3_D};
+    using Tensor = gttl::Tensor<Scalar, 2, dims>;
+    Tensor tensor{}; // initialize as zero
+    std::array<Scalar, 9> values{1, 0, 0, 0, 2, 0, 0, 0, 3};
+
+    for (auto i{0}; i < 3; ++i) {
+        tensor[i][i] = i + 1;
+    }
+
+    // note: In the bug tensor[0][0] was not initialized at this stage.
 
     BOOST_CHECK_EQUAL_COLLECTIONS(
         std::begin(tensor),
