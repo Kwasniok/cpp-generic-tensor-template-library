@@ -31,6 +31,12 @@ note: In the furture some of these might be provided as an extension. Forcing an
 The following items are supported via extensions of this library:
 - solving differential equations via 'boost::numeric::odeint`
 
+## Disclaimer
+As of now, the internal representation of tensors relies on anonymous `union`s.
+In terms of the current C+ standard (C++20) their usage is undefined behaviour (UB).
+For all tested combinations of hardware (`X86-64` and `ARM64`) and compilers (`gcc` and `clang` up to and including `-O3` and `-Ofast`) no UB was observed.
+To ensure correct behaviour on a specific platform it is strongly recommended to run the tests included here first and (if not already covered) custome tests involving the usage of tensors of desired shape and with the desired scalar type for **all** levels of optimization used. All common tensor operations must be verified first to guarentee correct results.
+
 ## Usage
 This is a header-only library. It is located inside the `include` folder.
 To import everything use
