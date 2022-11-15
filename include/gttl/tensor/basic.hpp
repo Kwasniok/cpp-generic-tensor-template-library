@@ -91,10 +91,14 @@ requires(cexpr::array::all_strictly_positive(DIMENSIONS)) struct Tensor {
     };
 
     /** @brief zero-initialize coefficients */
-    constexpr Tensor() { std::ranges::fill(coefficients, Traits::zero); }
+    constexpr Tensor() : coefficients{}
+    {
+        std::ranges::fill(coefficients, Traits::zero);
+    }
 
     /** @brief aggregate type-like initialization (from coefficients) */
     constexpr Tensor(std::initializer_list<Scalar> coefficients)
+        : coefficients{}
     {
         std::ranges::copy(coefficients, std::begin(this->coefficients));
         // fill rest with zeros
@@ -105,6 +109,7 @@ requires(cexpr::array::all_strictly_positive(DIMENSIONS)) struct Tensor {
 
     /** @brief aggregate type-like initialization (from subtensors) */
     constexpr Tensor(std::initializer_list<subtensor_type> subtensors)
+        : coefficients{}
     {
         std::ranges::copy(subtensors, std::begin(this->subtensors));
         // fill rest with zeros
