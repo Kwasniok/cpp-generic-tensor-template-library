@@ -97,12 +97,56 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(value_constructor_vector, Scalar, scalar_types)
     );
 }
 
+BOOST_AUTO_TEST_CASE_TEMPLATE(scalars_constructor_vector, Scalar, scalar_types)
+{
+    constexpr gttl::Dimensions<0> dims0{};
+    using S = gttl::Tensor<Scalar, 0, dims0>;
+
+    constexpr gttl::Dimensions<1> dims{3_D};
+    // note: It is important, that this call is unambigous!
+    // see: value_constructor_vector
+    gttl::Tensor<Scalar, 1, dims> tensor{S{1}, S{2}, S{3}};
+    std::array<Scalar, 3> values{1, 2, 3};
+
+    BOOST_CHECK_EQUAL_COLLECTIONS(
+        std::begin(tensor),
+        std::end(tensor),
+        std::begin(values),
+        std::end(values)
+    );
+}
+
 BOOST_AUTO_TEST_CASE_TEMPLATE(value_constructor_ten3, Scalar, scalar_types)
 {
     constexpr gttl::Dimensions<3> dims{4_D, 3_D, 2_D};
     gttl::Tensor<Scalar, 3, dims> tensor{
         +1, +2, +3, +4, +5, +6, +7, +8, +9, 10, 11, 12,
         13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
+    };
+    std::array<Scalar, 24> values{
+        +1, +2, +3, +4, +5, +6, +7, +8, +9, 10, 11, 12,
+        13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
+    };
+
+    BOOST_CHECK_EQUAL_COLLECTIONS(
+        std::begin(tensor),
+        std::end(tensor),
+        std::begin(values),
+        std::end(values)
+    );
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(matrices_constructor_ten3, Scalar, scalar_types)
+{
+    constexpr gttl::Dimensions<2> subdims{3_D, 2_D};
+    using SubTensor = gttl::Tensor<Scalar, 2, subdims>;
+
+    constexpr gttl::Dimensions<3> dims{4_D, 3_D, 2_D};
+    gttl::Tensor<Scalar, 3, dims> tensor{
+        SubTensor{+1, +2, +3, +4, +5, +6},
+        SubTensor{+7, +8, +9, 10, 11, 12},
+        SubTensor{13, 14, 15, 16, 17, 18},
+        SubTensor{19, 20, 21, 22, 23, 24},
     };
     std::array<Scalar, 24> values{
         +1, +2, +3, +4, +5, +6, +7, +8, +9, 10, 11, 12,
@@ -134,6 +178,25 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(
+    partial_scalars_constructor_vector, Scalar, scalar_types
+)
+{
+    constexpr gttl::Dimensions<0> dims0{};
+    using S = gttl::Tensor<Scalar, 0, dims0>;
+
+    constexpr gttl::Dimensions<1> dims{3_D};
+    gttl::Tensor<Scalar, 1, dims> tensor{S{1}, S{2}, /*3*/};
+    std::array<Scalar, 3> values{1, 2, 0};
+
+    BOOST_CHECK_EQUAL_COLLECTIONS(
+        std::begin(tensor),
+        std::end(tensor),
+        std::begin(values),
+        std::end(values)
+    );
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(
     partial_value_constructor_ten3, Scalar, scalar_types
 )
 {
@@ -143,8 +206,33 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(
         13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,*/
     };
     std::array<Scalar, 24> values{
-        +1, +2, +3, +4, +5, +6, +7, +8, +9, /*10, 11, 12,
+        +1, +2, +3, +4, +5, +6, +7, +8, +9, +0, +0, +0,
+        +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
+    };
+
+    BOOST_CHECK_EQUAL_COLLECTIONS(
+        std::begin(tensor),
+        std::end(tensor),
+        std::begin(values),
+        std::end(values)
+    );
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(
+    partial_matrices_constructor_ten3, Scalar, scalar_types
+)
+{
+    constexpr gttl::Dimensions<2> subdims{3_D, 2_D};
+    using SubTensor = gttl::Tensor<Scalar, 2, subdims>;
+
+    constexpr gttl::Dimensions<3> dims{4_D, 3_D, 2_D};
+    gttl::Tensor<Scalar, 3, dims> tensor{
+        SubTensor{+1, +2, +3, +4, +5, +6}, SubTensor{+7, +8, +9}, /*10, 11, 12,
         13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,*/
+    };
+    std::array<Scalar, 24> values{
+        +1, +2, +3, +4, +5, +6, +7, +8, +9, +0, +0, +0,
+        +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
     };
 
     BOOST_CHECK_EQUAL_COLLECTIONS(

@@ -15,6 +15,7 @@
 #include <limits>
 #include <ranges>
 
+#include "../concepts.hpp"
 #include "../dimensions.hpp"
 #include "../field_traits.hpp"
 #include "../multi_index.hpp"
@@ -90,31 +91,44 @@ requires(cexpr::array::all_strictly_positive(DIMENSIONS)) struct Tensor {
         subtensor_array_type subtensors;
     };
 
-    /** @brief zero-initialize coefficients */
+    /**
+     * @brief zero-initialize coefficients
+     * @note Enables access to #coefficients but disables access to
+     *       #subtensors in the context of constant expressions.
+     */
     constexpr Tensor() : coefficients{}
     {
         std::ranges::fill(coefficients, Traits::zero);
     }
 
-    /** @brief aggregate type-like initialization (from coefficients) */
-    constexpr Tensor(std::initializer_list<Scalar> coefficients)
-        : coefficients{}
+    /**
+     * @brief aggregate type-like initialization (from coefficients)
+     * @note Enables access to #coefficients but disables access to
+     *       #subtensors in the context of constant expressions.
+     */
+    template <
+        internal::convertible_to_but_not_same_as<Scalar, subtensor_type>... Ts>
+    constexpr Tensor(Ts... coefficients) requires(sizeof...(Ts) <= size)
+        : coefficients{static_cast<Scalar>(coefficients)...}
     {
-        std::ranges::copy(coefficients, std::begin(this->coefficients));
         // fill rest with zeros
         auto it = std::begin(this->coefficients);
-        std::advance(it, coefficients.size());
+        std::advance(it, sizeof...(Ts));
         std::fill(it, std::end(this->coefficients), Traits::zero);
     }
 
-    /** @brief aggregate type-like initialization (from subtensors) */
-    constexpr Tensor(std::initializer_list<subtensor_type> subtensors)
-        : coefficients{}
+    /**
+     *@brief aggregate type-like initialization (from subtensors)
+     * @note Enables access to #subtensors but disables access to
+     *       #coefficients in the context of constant expressions.
+     */
+    template <std::same_as<subtensor_type>... Ts>
+    constexpr Tensor(Ts... subtensors) requires(sizeof...(Ts) <= DIMENSIONS[0])
+        : subtensors{subtensors...}
     {
-        std::ranges::copy(subtensors, std::begin(this->subtensors));
         // fill rest with zeros
         auto it = std::begin(this->subtensors);
-        std::advance(it, subtensors.size());
+        std::advance(it, sizeof...(Ts));
         for (auto end = std::end(this->subtensors); it != end; ++it) {
             *it = subtensor_type{};
         }
