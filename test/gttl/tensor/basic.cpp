@@ -69,6 +69,81 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(default_constructor_ten3, Scalar, scalar_types)
     );
 }
 
+BOOST_AUTO_TEST_CASE_TEMPLATE(
+    default_constructor_constexpr_scalar, Scalar, scalar_types
+)
+{
+    constexpr gttl::Dimensions<0> dims{};
+    using Tensor = gttl::Tensor<Scalar, 0, dims>;
+    constexpr Tensor tensor = []() {
+        Tensor ten{};
+        // modify coefficients (subtensors is inactive)
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
+        ten.coefficients[0] = Scalar{1};
+        ten += Scalar{20};
+        ten += Tensor{300};
+        return ten;
+    }();
+    std::array<Scalar, 1> values{321};
+
+    BOOST_CHECK_EQUAL_COLLECTIONS(
+        std::begin(tensor),
+        std::end(tensor),
+        std::begin(values),
+        std::end(values)
+    );
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(
+    default_constructor_constexpr_vector, Scalar, scalar_types
+)
+{
+    constexpr gttl::Dimensions<1> dims{3_D};
+    using Tensor = gttl::Tensor<Scalar, 1, dims>;
+    constexpr Tensor tensor = []() {
+        Tensor ten{};
+        // modify coefficients (subtensors is inactive)
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
+        ten.coefficients[0] = Scalar{1};
+        ten += Tensor{20};
+        return ten;
+    }();
+    std::array<Scalar, 3> values{21, 0, 0};
+
+    BOOST_CHECK_EQUAL_COLLECTIONS(
+        std::begin(tensor),
+        std::end(tensor),
+        std::begin(values),
+        std::end(values)
+    );
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(
+    default_constructor_constexpr_ten3, Scalar, scalar_types
+)
+{
+    constexpr gttl::Dimensions<3> dims{4_D, 3_D, 2_D};
+    using Tensor = gttl::Tensor<Scalar, 3, dims>;
+    constexpr Tensor tensor = []() {
+        Tensor ten{};
+        // modify coefficients (subtensors is inactive)
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
+        ten.coefficients[0] = Scalar{1};
+        ten += Tensor{20};
+        return ten;
+    }();
+    std::array<Scalar, 24> values{
+        21, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    };
+
+    BOOST_CHECK_EQUAL_COLLECTIONS(
+        std::begin(tensor),
+        std::end(tensor),
+        std::begin(values),
+        std::end(values)
+    );
+}
+
 BOOST_AUTO_TEST_CASE_TEMPLATE(value_constructor_scalar, Scalar, scalar_types)
 {
     constexpr gttl::Dimensions<0> dims{};
@@ -145,6 +220,82 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(
     std::array<Scalar, 24> values{
         +1, +2, +3, +4, +5, +6, +7, +8, +9, +0, +0, +0,
         +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
+    };
+
+    BOOST_CHECK_EQUAL_COLLECTIONS(
+        std::begin(tensor),
+        std::end(tensor),
+        std::begin(values),
+        std::end(values)
+    );
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(
+    value_constructor_constexpr_scalar, Scalar, scalar_types
+)
+{
+    constexpr gttl::Dimensions<0> dims{};
+    using Tensor = gttl::Tensor<Scalar, 0, dims>;
+    constexpr Tensor tensor = []() {
+        Tensor ten{1};
+        // modify coefficients (subtensors is inactive)
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
+        ten.coefficients[0] += Scalar{20};
+        ten += Scalar{300};
+        ten += Tensor{4000};
+        return ten;
+    }();
+    std::array<Scalar, 1> values{4321};
+
+    BOOST_CHECK_EQUAL_COLLECTIONS(
+        std::begin(tensor),
+        std::end(tensor),
+        std::begin(values),
+        std::end(values)
+    );
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(
+    value_constructor_constexpr_vector, Scalar, scalar_types
+)
+{
+    constexpr gttl::Dimensions<1> dims{3_D};
+    using Tensor = gttl::Tensor<Scalar, 1, dims>;
+    constexpr Tensor tensor = []() {
+        Tensor ten{1};
+        // modify coefficients (subtensors is inactive)
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
+        ten.coefficients[0] += Scalar{20};
+        ten += Tensor{300};
+        return ten;
+    }();
+    std::array<Scalar, 3> values{321, 0, 0};
+
+    BOOST_CHECK_EQUAL_COLLECTIONS(
+        std::begin(tensor),
+        std::end(tensor),
+        std::begin(values),
+        std::end(values)
+    );
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(
+    value_constructor_constexpr_ten3, Scalar, scalar_types
+)
+{
+    constexpr gttl::Dimensions<3> dims{4_D, 3_D, 2_D};
+    using Tensor = gttl::Tensor<Scalar, 3, dims>;
+    constexpr Tensor tensor = []() {
+        Tensor ten{1};
+        // modify coefficients (subtensors is inactive)
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
+        ten.coefficients[0] += Scalar{20};
+        ten += Tensor{300};
+        return ten;
+    }();
+    std::array<Scalar, 24> values{
+        321, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0,   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     };
 
     BOOST_CHECK_EQUAL_COLLECTIONS(
@@ -234,6 +385,50 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(
     std::array<Scalar, 24> values{
         +1, +2, +3, +4, +5, +6, +7, +8, +9, 10, 11, 12,
         /*13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,*/
+    };
+
+    BOOST_CHECK_EQUAL_COLLECTIONS(
+        std::begin(tensor),
+        std::end(tensor),
+        std::begin(values),
+        std::end(values)
+    );
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(
+    subtensor_constructor_constexpr_vector, Scalar, scalar_types
+)
+{
+    constexpr gttl::Dimensions<1> dims{3_D};
+    using Tensor = gttl::Tensor<Scalar, 1, dims>;
+
+    constexpr gttl::Dimensions<0> dims_sub{};
+    using SubTensor = gttl::Tensor<Scalar, 0, dims_sub>;
+
+    constinit static Tensor tensor{SubTensor{7}};
+    std::array<Scalar, 3> values{7, 0, 0};
+
+    BOOST_CHECK_EQUAL_COLLECTIONS(
+        std::begin(tensor),
+        std::end(tensor),
+        std::begin(values),
+        std::end(values)
+    );
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(
+    subtensor_constructor_constexpr_ten3, Scalar, scalar_types
+)
+{
+    constexpr gttl::Dimensions<3> dims{4_D, 3_D, 2_D};
+    using Tensor = gttl::Tensor<Scalar, 3, dims>;
+
+    constexpr gttl::Dimensions<0> dims_sub{};
+    using SubTensor = gttl::Tensor<Scalar, 0, dims_sub>;
+
+    constinit static Tensor tensor{SubTensor{7}};
+    std::array<Scalar, 24> values{
+        7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     };
 
     BOOST_CHECK_EQUAL_COLLECTIONS(

@@ -30,6 +30,12 @@ namespace gttl
  * (coefficients).
  * @note Is a standard layout struct.
  * @note Mimics an aggregate type.
+ * @note Can be used in constant expressions as long as manipulated through the
+ *       coefficients. This includes deafult- and value construction, copy,
+ *       move, destruction, access to coefficients, arithmetic operations and
+ *       elementwise operations. Using `operator[]` and accessing subtensors
+ *       IS NOT possible in constant expressions. However, constant
+ *       initialization with subtensors IS possible
  */
 template <
     typename Scalar,
@@ -95,6 +101,7 @@ requires(cexpr::array::all_strictly_positive(DIMENSIONS)) struct Tensor {
      * @brief zero-initialize coefficients
      * @note Enables access to #coefficients but disables access to
      *       #subtensors in the context of constant expressions.
+     * @note Can be copied, moved and destructed in constant expressions.
      */
     constexpr Tensor() : coefficients{}
     {
@@ -105,6 +112,7 @@ requires(cexpr::array::all_strictly_positive(DIMENSIONS)) struct Tensor {
      * @brief aggregate type-like initialization (from coefficients)
      * @note Enables access to #coefficients but disables access to
      *       #subtensors in the context of constant expressions.
+     * @note Can be copied, moved and destructed in constant expressions.
      */
     template <
         internal::convertible_to_but_not_same_as<Scalar, subtensor_type>... Ts>
@@ -121,6 +129,8 @@ requires(cexpr::array::all_strictly_positive(DIMENSIONS)) struct Tensor {
      *@brief aggregate type-like initialization (from subtensors)
      * @note Enables access to #subtensors but disables access to
      *       #coefficients in the context of constant expressions.
+     * @note CANNOT be copied, moved and destructed in constant expressions but
+     *       is usable with `constinit`!
      */
     template <std::same_as<subtensor_type>... Ts>
     constexpr Tensor(Ts... subtensors) requires(sizeof...(Ts) <= DIMENSIONS[0])
